@@ -2,6 +2,7 @@
 Empty space:    .
 Rock/border:    x
 Player:         p
+<<<<<<< Updated upstream
 '''
 
 
@@ -16,4 +17,27 @@ MAP_0 = [
     "x.....x",
     "x.....x",
     "xxxxxxx",
+=======
+Ghost:          g
+'''
+
+
+TILE_SIZE = 64
+
+
+MAP_0 = [
+    "xxxxxxxxxxxxx",
+    "x...........x",
+    "x.....p.....x",
+    "x...........x",
+    "x....xxx....x",
+    "x...........x",
+    "x...........x",
+    "x...........x",
+    "x....xxx....x",
+    "x...........x",
+    "x.....g.....x",
+    "x...........x",
+    "xxxxxxxxxxxxx",
+>>>>>>> Stashed changes
 ]
