@@ -1,42 +1,15 @@
 import pygame
 from maps import *
 from player import Player
-<<<<<<< Updated upstream
-from tile import Tile
-
-
-=======
 from enemy import Enemy
 from tile import Tile
 
 
-def get_surface():
-    zoom = 1
-    #return pygame.Surface((int(1000 / zoom), int(800 / zoom)))
-    return pygame.display.get_surface()
-
-
->>>>>>> Stashed changes
 class Level:
     def __init__(self):
 
         # get the display surface
-<<<<<<< Updated upstream
         self.display_surface = pygame.display.get_surface()
-
-        # Sprite group setup
-        self.visible_sprites = pygame.sprite.Group()
-        self.obstacle_sprites = pygame.sprite.Group()
-
-        # sprite setup
-        self.create_map()
-
-    def run(self):
-        # update and draw the game
-        self.visible_sprites.draw(self.display_surface)
-        self.visible_sprites.update()
-=======
-        self.display_surface = get_surface()
 
         # Sprite group setup
         self.visible_sprites = YSortCameraGroup()
@@ -57,18 +30,12 @@ class Level:
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
 
->>>>>>> Stashed changes
 
     def create_map(self):
         for i in range(len(MAP_0)):
             for j in range(len(MAP_0[0])):
                 item = MAP_0[i][j]
                 if item == "p":
-<<<<<<< Updated upstream
-                    self.player = Player((j * TILE_SIZE, i * TILE_SIZE), [self.visible_sprites], self.obstacle_sprites)
-                elif item == "x":
-                    Tile((j * TILE_SIZE, i * TILE_SIZE), [self.visible_sprites, self.obstacle_sprites])
-=======
                     self.player = Player((j * TILE_SIZE, i * TILE_SIZE), 
                                          [self.visible_sprites], 
                                          self.obstacle_sprites)
@@ -86,7 +53,7 @@ class Level:
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self):
         super().__init__()
-        self.display_surface = get_surface()
+        self.display_surface = pygame.display.get_surface()
         self.half_width = self.display_surface.get_size()[0] // 2
         self.half_height = self.display_surface.get_size()[1] // 2
         self.offset = pygame.math.Vector2()
@@ -105,4 +72,3 @@ class YSortCameraGroup(pygame.sprite.Group):
         enemy_sprites = [sprite for sprite in self.sprites() if hasattr(sprite, "sprite_type") and sprite.sprite_type == "enemy"]
         for enemy in enemy_sprites:
             enemy.enemy_update(player)
->>>>>>> Stashed changes
