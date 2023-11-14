@@ -95,31 +95,20 @@ class Player(Entity):
             self.direction.x = 0
             self.direction.y = 0
             self.attacking = False
-            if not "block" in self.status:
-                if "stand" in self.status:
-                    self.status = self.status.replace("_stand", "_block")
-                elif "attack" in self.status:
-                    self.status = self.status.replace("_attack", "_block")
-                else:
-                    self.status += "_block"
+            
+            self.remove_actions()
+            self.status += "_block"
 
         elif self.attacking:
             self.direction.x = 0
             self.direction.y = 0
-            if not "attack" in self.status:
-                if "stand" in self.status:
-                    self.status = self.status.replace("_stand", "_attack")
-                elif "block" in self.status:
-                    self.status = self.status.replace("_block", "_attack")
-                else:
-                    self.status += "_attack"
+
+            self.remove_actions()
+            self.status += "_attack"
 
         else:
-            if "attack" in self.status:
-                self.status = self.status.replace("_attack", "")
-            if "block" in self.status:
-                self.status = self.status.replace("_block", "")
-            if self.direction.x == 0 and self.direction.y == 0 and "stand" not in self.status:
+            self.remove_actions()
+            if self.direction.x == 0 and self.direction.y == 0:
                 self.status += "_stand"
 
 
