@@ -10,3 +10,5 @@ The goal for this project is to implement a variety of 2D gameplay mechanics. Th
 * At least one boss battle.
 
 Due to its simplicity and my familiarity with the language, this game will be written in Python using the [Pygame](https://www.pygame.org/wiki/about) library.
+
+This project will be based on [this Pygame tutorial](https://www.youtube.com/watch?v=QU1pPzEGrqw).
