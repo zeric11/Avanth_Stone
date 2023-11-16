@@ -14,7 +14,7 @@ class Player(Entity):
         self.import_player_textures()
         self.status = "down_stand"
         
-        self.speed = 5
+        self.speed = 10
         self.blocking = False
         self.attacking = False
         self.attack_duration = 300

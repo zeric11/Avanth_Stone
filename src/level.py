@@ -2,6 +2,9 @@ import pygame
 from maps import *
 from player import Player
 from enemy import Enemy
+from ghost import Ghost
+from sentry import Sentry
+from bomber import Bomber
 from tile import Tile
 from csv import reader
 from os import walk
@@ -48,7 +51,6 @@ class Level:
             "Floor" : import_csv_layout("../map/map_Floor.csv"),
         }
         nature_textures = import_folder("../textures/nature")
-        print(len(nature_textures))
         
         for layer, layout in layouts.items():
             for i in range(len(layout)):
@@ -101,15 +103,12 @@ class Level:
                             if item_id == "0":
                                 self.player = Player((x, y), [self.visible_sprites], self.obstacle_sprites)
                             elif item_id == "1":
-                                Enemy("ghost", (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
+                                Ghost((x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
                             elif item_id == "2":
-                                Enemy("ghost", (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
+                                Sentry((x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
                             elif item_id == "3":
-                                Enemy("ghost", (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
+                                Bomber((x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
                                 
-
-    
-
 
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self):
