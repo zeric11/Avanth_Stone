@@ -7,6 +7,7 @@ class Entity(pygame.sprite.Sprite):
         self.animation_speed = 0.08
         self.direction = pygame.Vector2()
         self.status = None
+        self.shadow = self.get_texture_surface("../textures/entities/shadow.png")
 
     
     def move(self, speed):
@@ -49,6 +50,24 @@ class Entity(pygame.sprite.Sprite):
                 self.status = self.status.replace("_attack", "")
         if "block" in self.status:
                 self.status = self.status.replace("_block", "")
+                
+                
+    def get_normalized_direction(self, direction):
+        normalized_direction = pygame.Vector2()
+        if abs(direction.x) > abs(direction.y):
+            normalized_direction.xy = direction.x, 0
+        else:
+            normalized_direction.xy = 0, direction.y
+        if normalized_direction.x != 0 or normalized_direction.y != 0:
+            normalized_direction.normalize()
+        return normalized_direction
+    
+    
+    def get_reversed_direction(self, direction):
+        reversed_direction = pygame.Vector2()
+        reversed_direction.x = -direction.x if direction.x != 0 else 0
+        reversed_direction.y = -direction.y if direction.y != 0 else 0
+        return reversed_direction
 
 
     def get_direction_str(self):

@@ -56,6 +56,14 @@ class Enemy(Entity):
 
     def cooldown(self):
         raise NotImplementedError()
+    
+    
+    def player_attack_update(self, player):
+        player_distance, player_direction = self.get_player_distance_direction(player)
+        if player_distance < player.attack_distance:
+            if player.is_attacking:
+                if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
+                    self.health -= player.attack_damage
 
     
     def update(self):
@@ -64,6 +72,11 @@ class Enemy(Entity):
         self.cooldown()
 
 
+    # Returns whether or not the sprite has been killed.
     def enemy_update(self, player):
         self.get_status(player)
-        #self.actions(player)
+        self.player_attack_update(player)
+        if self.health <= 0:
+            self.kill()
+            return True        
+        return False

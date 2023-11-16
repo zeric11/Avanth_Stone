@@ -117,6 +117,8 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.half_width = self.display_surface.get_size()[0] // 2
         self.half_height = self.display_surface.get_size()[1] // 2
         self.offset = pygame.math.Vector2()
+        self.shadow_offset = pygame.math.Vector2()
+        self.shadow_offset.xy = 0, -8
         
         # 1:18:00
         self.floor_surface = pygame.image.load("../textures/tilemap/map_graphic.png").convert()
@@ -144,13 +146,19 @@ class YSortCameraGroup(pygame.sprite.Group):
         
         for sprite in sorted(self.sprites(), key=sprite_order_key):
             offset_pos = sprite.rect.topleft - self.offset
+            if type(sprite) == Player or issubclass(type(sprite), Enemy):
+                self.display_surface.blit(sprite.shadow, offset_pos - self.shadow_offset)
+            if type(sprite) == Bomber:
+                offset_pos.y -= 150
             self.display_surface.blit(sprite.image, offset_pos)
 
 
     def enemy_update(self, player):
-        enemy_sprites = [sprite for sprite in self.sprites() if hasattr(sprite, "sprite_type") and sprite.sprite_type == "enemy"]
+        enemy_sprites = [sprite for sprite in self.sprites() if sprite.sprite_type == "enemy"]
         for enemy in enemy_sprites:
-            enemy.enemy_update(player)
+            is_killed = enemy.enemy_update(player)
+            if is_killed:
+                print(len(enemy_sprites) - 1, "enemies remain.")
 
 
 def import_csv_layout(path):

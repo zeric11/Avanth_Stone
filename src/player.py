@@ -16,7 +16,9 @@ class Player(Entity):
         
         self.speed = 10
         self.blocking = False
-        self.attacking = False
+        self.attack_damage = 10
+        self.attack_distance = 100
+        self.is_attacking = False
         self.attack_duration = 300
         self.attack_cooldown = 500
         self.attack_start_time = 0
@@ -62,12 +64,12 @@ class Player(Entity):
         self.blocking = False
 
         # Abilities input
-        if not self.attacking and keys[pygame.K_z]:
-            self.attacking = True
+        if not self.is_attacking and keys[pygame.K_z]:
+            self.is_attacking = True
             self.attack_start_time = pygame.time.get_ticks()
 
         if keys[pygame.K_x]:
-            self.attacking = False
+            self.is_attacking = False
             self.blocking = True
 
         # Movement input
@@ -94,12 +96,12 @@ class Player(Entity):
         if self.blocking:
             self.direction.x = 0
             self.direction.y = 0
-            self.attacking = False
+            self.is_attacking = False
             
             self.remove_actions()
             self.status += "_block"
 
-        elif self.attacking:
+        elif self.is_attacking:
             self.direction.x = 0
             self.direction.y = 0
 
@@ -110,17 +112,33 @@ class Player(Entity):
             self.remove_actions()
             if self.direction.x == 0 and self.direction.y == 0:
                 self.status += "_stand"
-
+                
+                
+    def get_direction_facing(self):
+        if self.direction.x != 0 or self.direction.y != 0:
+            return self.direction
+        direction = pygame.Vector2()
+        if "down" in self.status:
+            direction.xy = 0, 1
+        elif "up" in self.status:
+            direction.xy = 0, -1
+        elif "left" in self.status:
+            direction.xy = -1, 0
+        elif "right" in self.status:
+            direction.xy = 1, 0
+        return direction
+        
+                
 
     def cooldowns(self):
         current_time = pygame.time.get_ticks()
 
-        if self.attacking and current_time - self.attack_start_time >= self.attack_duration:
-            self.attacking = False
+        if self.is_attacking and current_time - self.attack_start_time >= self.attack_duration:
+            self.is_attacking = False
             self.attack_end_time = pygame.time.get_ticks()
 
-        if self.attacking and current_time - self.attack_end_time < self.attack_cooldown:
-            self.attacking = False
+        if self.is_attacking and current_time - self.attack_end_time < self.attack_cooldown:
+            self.is_attacking = False
             
 
     def animate(self):
@@ -131,6 +149,7 @@ class Player(Entity):
             self.frame_index = 0
 
         self.image = animation[int(self.frame_index)]
+        #self.image.blit(self.shadow, (0, 0))
         self.rect = self.image.get_rect(center=self.hitbox.center)
             
             

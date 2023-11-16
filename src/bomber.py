@@ -69,7 +69,7 @@ class Bomber(Enemy):
         self.cooldown()
 
 
-    def enemy_update(self, player):
-        self.get_status(player)
-        #self.actions(player)
+    #def enemy_update(self, player):
+    #    self.get_status(player)
+    #   #self.actions(player)
     
