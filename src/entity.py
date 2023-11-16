@@ -1,21 +1,42 @@
 import pygame
 
 class Entity(pygame.sprite.Sprite):
-    def __init__(self, groups):
+    def __init__(self, pos, groups):
         super().__init__(groups)
+        self.position = pos
         self.frame_index = 0
         self.animation_speed = 0.08
         self.direction = pygame.Vector2()
         self.status = None
         self.shadow = self.get_texture_surface("../textures/entities/shadow.png")
+        self.knock_back_amount = 0
+        self.knock_back_speed = 0
+        self.knock_back_direction = 0
 
     
     def move(self, speed):
-        if self.direction.magnitude() != 0:
-            self.direction = self.direction.normalize()
-        self.hitbox.x += self.direction.x * speed
+        if self.knock_back_amount > 0:
+            self.move_direction(self.knock_back_speed, self.knock_back_direction)
+            self.knock_back_amount -= 1
+            if self.knock_back_amount == 0:
+                self.knock_back_speed = 0
+                self.knock_back_direction = 0
+        else:
+            self.move_direction(speed, self.direction)
+
+        
+    def knock_back(self, duration, intensity, direction):
+        self.knock_back_amount = duration
+        self.knock_back_speed = intensity
+        self.knock_back_direction = direction
+    
+    
+    def move_direction(self, speed, direction):
+        if direction.magnitude() != 0:
+            direction = direction.normalize()
+        self.hitbox.x += direction.x * speed
         self.collision("horizontal")
-        self.hitbox.y += self.direction.y * speed
+        self.hitbox.y += direction.y * speed
         self.collision("vertical")
         self.rect.center = self.hitbox.center
 

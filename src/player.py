@@ -4,7 +4,7 @@ from entity import Entity
 
 class Player(Entity):
     def __init__(self, pos, groups, obstacle_sprites):
-        super().__init__(groups)
+        super().__init__(pos, groups)
         self.sprite_type = "player"
         self.image = self.get_texture_surface("../textures/entities/player/down/stand.png")
         self.rect = self.image.get_rect(topleft=pos)
@@ -14,12 +14,13 @@ class Player(Entity):
         self.import_player_textures()
         self.status = "down_stand"
         
+        self.health = 100
         self.speed = 10
-        self.blocking = False
+        self.is_blocking = False
         self.attack_damage = 10
         self.attack_distance = 100
         self.is_attacking = False
-        self.attack_duration = 300
+        self.attack_duration = 50
         self.attack_cooldown = 500
         self.attack_start_time = 0
         self.attack_end_time = 0
@@ -61,7 +62,7 @@ class Player(Entity):
 
     def get_input(self):
         keys = pygame.key.get_pressed()
-        self.blocking = False
+        self.is_blocking = False
 
         # Abilities input
         if not self.is_attacking and keys[pygame.K_z]:
@@ -70,7 +71,7 @@ class Player(Entity):
 
         if keys[pygame.K_x]:
             self.is_attacking = False
-            self.blocking = True
+            self.is_blocking = True
 
         # Movement input
         if keys[pygame.K_UP]:
@@ -93,7 +94,7 @@ class Player(Entity):
 
         
     def get_status(self):
-        if self.blocking:
+        if self.is_blocking:
             self.direction.x = 0
             self.direction.y = 0
             self.is_attacking = False
@@ -159,3 +160,10 @@ class Player(Entity):
         self.get_status()
         self.animate()
         self.move(self.speed)
+        if self.health <= 0:
+            self.kill()
+            return True        
+        return False
+    
+        
+

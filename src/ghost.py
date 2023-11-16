@@ -13,7 +13,7 @@ class Ghost(Enemy):
         self.health = 100
         self.speed = 2
         self.attack_damage = 10
-        self.attack_radius = 50
+        self.attack_distance = 5
         self.notice_radius = 500
 
         # player interaction
@@ -83,6 +83,29 @@ class Ghost(Enemy):
             current_time = pygame.time.get_ticks()
             if current_time - self.attack_time >= self.attack_cooldown:
                 self.can_attack = True
+                
+                
+    def player_attack_update(self, player):
+        player_distance, player_direction = self.get_player_distance_direction(player)
+        #print(player.attack_state)
+        #if player.attack_state == "attacking":
+        #    print("here")
+        
+        if player_distance < player.attack_distance:
+            if player.is_attacking:
+                if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
+                    self.health -= player.attack_damage
+                    self.knock_back(10, 10, self.get_reversed_direction(player_direction))
+                    
+        if player_distance < self.attack_distance:
+            if player.is_blocking and self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5:
+                player.knock_back(10, 10, player_direction)
+                self.knock_back(10, 5, self.get_reversed_direction(player_direction))
+            else:
+                player.health -= self.attack_damage
+                player.knock_back(10, 10, player_direction)
+            
+        
 
     
     def update(self):

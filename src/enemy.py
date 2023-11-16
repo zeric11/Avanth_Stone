@@ -4,7 +4,7 @@ from entity import Entity
 
 class Enemy(Entity):
     def __init__(self, name, pos, groups, obstacle_sprites):
-        super().__init__(groups)
+        super().__init__(pos, groups)
         self.sprite_type = "enemy"
         self.enemy_name = name
         self.image = pygame.Surface((64, 64))
@@ -64,7 +64,7 @@ class Enemy(Entity):
             if player.is_attacking:
                 if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
                     self.health -= player.attack_damage
-
+                    
     
     def update(self):
         self.move(self.speed)
