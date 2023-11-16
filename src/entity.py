@@ -6,6 +6,7 @@ class Entity(pygame.sprite.Sprite):
         self.frame_index = 0
         self.animation_speed = 0.08
         self.direction = pygame.Vector2()
+        self.status = None
 
     
     def move(self, speed):
@@ -39,3 +40,28 @@ class Entity(pygame.sprite.Sprite):
     def get_texture_surface(self, path):
         surface = pygame.image.load(path).convert_alpha()
         return pygame.transform.scale(surface, (64, 64))
+    
+
+    def remove_actions(self):
+        if "stand" in self.status:
+                self.status = self.status.replace("_stand", "")
+        if "attack" in self.status:
+                self.status = self.status.replace("_attack", "")
+        if "block" in self.status:
+                self.status = self.status.replace("_block", "")
+
+
+    def get_direction_str(self):
+        if abs(self.direction.x) > abs(self.direction.y):
+            if self.direction.x > 0:
+                return "right"
+            else:
+                return "left"
+        else:
+            if self.direction.y > 0:
+                return "down"
+            else:
+                return "up"
+            
+             
+            

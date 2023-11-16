@@ -2,8 +2,8 @@ import sys, pygame
 from level import Level
 
 
-S_WIDTH = 1000
-S_HEIGHT = 800
+S_WIDTH = 1920
+S_HEIGHT = 1080
 FPS = 60
 
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
                 pygame.quit()
                 sys.exit()
 
-        screen.fill("green")
+        screen.fill("black")
         level.run()
         pygame.display.update()
         clock.tick(FPS)
