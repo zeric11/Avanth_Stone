@@ -40,34 +40,10 @@ class Enemy(Entity):
         else:
             direction = pygame.math.Vector2()
         return (distance, direction)
-    
-
-    def set_direction(self, player_direction):
-        if abs(player_direction.x) > abs(player_direction.y):
-            self.direction.xy = player_direction.x, 0
-        else:
-            self.direction.xy = 0, player_direction.y
-        if self.direction.x != 0 or self.direction.y != 0:
-            self.direction.normalize()
 
 
     def get_status(self, player):
-        distance = self.get_player_distance_direction(player)[0]
-
-        # NEED TO FIX DIRECTIONAL STATUS
-        if distance <= self.attack_radius and self.can_attack:
-            if self.status != "attack":
-                self.frame_index = 0
-            self.status = "down_attack"
-        elif distance <= self.notice_radius:
-            self.status = "down"
-        else:
-            self.status = "down_stand"
-
-
-        else:
-            self.direction = player_direction
-            self.status = self.get_direction_str()
+        raise NotImplementedError()
 
         
     def actions(self,player):
