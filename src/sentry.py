@@ -2,6 +2,7 @@ import pygame
 from entity import Entity
 from enemy import Enemy
 
+
 class Sentry(Enemy):
     def __init__(self, pos, groups, obstacle_sprites):
         super().__init__("sentry", pos, groups, obstacle_sprites)
@@ -13,13 +14,13 @@ class Sentry(Enemy):
         self.health = 100
         self.speed = 0
         self.attack_damage = 0
-        self.attack_radius = 0
-        self.notice_radius = 500
+        self.attack_radius = 1000
+        self.notice_radius = 1000
 
         # player interaction
         self.can_attack = True
         self.attack_time = None
-        self.attack_cooldown = 400
+        self.attack_cooldown = 10000
         
     
     def import_textures(self):
@@ -54,6 +55,22 @@ class Sentry(Enemy):
             current_time = pygame.time.get_ticks()
             if current_time - self.attack_time >= self.attack_cooldown:
                 self.can_attack = True
+                
+                
+    def player_attack_update(self, player):
+        player_distance, player_direction = self.get_player_distance_direction(player)
+        if player_distance < player.attack_distance:
+            if player.is_attacking:
+                if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
+                    self.health -= player.attack_damage
+                    
+        if player_distance < self.attack_radius and self.can_attack:
+            self.attack_time = pygame.time.get_ticks()
+            self.can_attack = False
+            return player_direction
+        else:
+            return None
+                    
 
     
     def update(self):

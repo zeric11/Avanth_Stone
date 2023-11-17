@@ -15,7 +15,7 @@ class Player(Entity):
         self.status = "down_stand"
         
         self.health = 100
-        self.speed = 10
+        self.speed = 7
         self.is_blocking = False
         self.attack_damage = 10
         self.attack_distance = 100

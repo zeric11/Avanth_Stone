@@ -72,11 +72,12 @@ class Enemy(Entity):
         self.cooldown()
 
 
-    # Returns whether or not the sprite has been killed.
+    # Returns whether or not the sprite has been killed and the direction of a launched orb.
     def enemy_update(self, player):
         self.get_status(player)
-        self.player_attack_update(player)
+        orb_direction = self.player_attack_update(player)
+        is_killed = False
         if self.health <= 0:
             self.kill()
-            return True        
-        return False
+            is_killed = True        
+        return (is_killed, orb_direction)

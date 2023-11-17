@@ -2,6 +2,7 @@ import pygame
 from entity import Entity
 from enemy import Enemy
 
+
 class Ghost(Enemy):
     def __init__(self, pos, groups, obstacle_sprites):
         super().__init__("ghost", pos, groups, obstacle_sprites)
@@ -87,9 +88,6 @@ class Ghost(Enemy):
                 
     def player_attack_update(self, player):
         player_distance, player_direction = self.get_player_distance_direction(player)
-        #print(player.attack_state)
-        #if player.attack_state == "attacking":
-        #    print("here")
         
         if player_distance < player.attack_distance:
             if player.is_attacking:
@@ -97,13 +95,16 @@ class Ghost(Enemy):
                     self.health -= player.attack_damage
                     self.knock_back(10, 10, self.get_reversed_direction(player_direction))
                     
-        if player_distance < self.attack_distance:
+        if player_distance < self.attack_distance and self.can_attack:
             if player.is_blocking and self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5:
                 player.knock_back(10, 10, player_direction)
                 self.knock_back(10, 5, self.get_reversed_direction(player_direction))
             else:
                 player.health -= self.attack_damage
                 player.knock_back(10, 10, player_direction)
+                
+            self.attack_time = pygame.time.get_ticks()
+            self.can_attack = False
             
         
 

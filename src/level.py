@@ -4,6 +4,7 @@ from player import Player
 from enemy import Enemy
 from ghost import Ghost
 from sentry import Sentry
+from orb import Orb
 from bomber import Bomber
 from tile import Tile
 from csv import reader
@@ -33,7 +34,7 @@ class Level:
         # update and draw the game
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
-        self.visible_sprites.enemy_update(self.player)
+        self.enemy_update(self.player)
 
     
     def create_map(self):
@@ -109,7 +110,16 @@ class Level:
                             elif item_id == "3":
                                 Bomber((x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
                                 
-
+    def enemy_update(self, player):
+        enemy_sprites = [sprite for sprite in self.visible_sprites.sprites() if sprite.sprite_type == "enemy"]
+        for enemy in enemy_sprites:
+            is_killed, orb_direction = enemy.enemy_update(player)
+            if is_killed and type(enemy) != Orb:
+                print(len(enemy_sprites) - 1, "enemies remain.")
+            if orb_direction:
+                Orb(enemy.position, orb_direction, [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
+                                
+                                
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self):
         super().__init__()
@@ -151,14 +161,6 @@ class YSortCameraGroup(pygame.sprite.Group):
             if type(sprite) == Bomber:
                 offset_pos.y -= 150
             self.display_surface.blit(sprite.image, offset_pos)
-
-
-    def enemy_update(self, player):
-        enemy_sprites = [sprite for sprite in self.sprites() if sprite.sprite_type == "enemy"]
-        for enemy in enemy_sprites:
-            is_killed = enemy.enemy_update(player)
-            if is_killed:
-                print(len(enemy_sprites) - 1, "enemies remain.")
 
 
 def import_csv_layout(path):
