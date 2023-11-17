@@ -3,7 +3,7 @@ from entity import Entity
 
 
 class Player(Entity):
-    def __init__(self, pos, groups, obstacle_sprites):
+    def __init__(self, pos, groups, obstacle_sprites=None):
         super().__init__(pos, groups)
         self.sprite_type = "player"
         self.image = self.get_texture_surface("../textures/entities/player/down/stand.png")

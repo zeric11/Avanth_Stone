@@ -4,7 +4,7 @@ from enemy import Enemy
 
 
 class Sentry(Enemy):
-    def __init__(self, pos, groups, obstacle_sprites):
+    def __init__(self, pos, groups, obstacle_sprites=None):
         super().__init__("sentry", pos, groups, obstacle_sprites)
         self.image = self.get_texture_surface("../textures/entities/sentry/down.png")
         

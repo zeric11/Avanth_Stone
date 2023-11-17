@@ -6,6 +6,7 @@ from ghost import Ghost
 from sentry import Sentry
 from orb import Orb
 from bomber import Bomber
+from meteor import Meteor
 from tile import Tile
 from csv import reader
 from os import walk
@@ -113,12 +114,14 @@ class Level:
     def enemy_update(self, player):
         enemy_sprites = [sprite for sprite in self.visible_sprites.sprites() if sprite.sprite_type == "enemy"]
         for enemy in enemy_sprites:
-            is_killed, orb_direction = enemy.enemy_update(player)
-            if is_killed and type(enemy) != Orb:
+            is_killed, projectile_direction = enemy.enemy_update(player)
+            if is_killed and type(enemy) not in (Orb, Meteor):
                 print(len(enemy_sprites) - 1, "enemies remain.")
-            if orb_direction:
-                Orb(enemy.position, orb_direction, [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
-                                
+            if projectile_direction:
+                if type(enemy) == Sentry:
+                    Orb(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites])
+                elif type(enemy) == Bomber:
+                    Meteor(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites])          
                                 
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self):
@@ -154,13 +157,21 @@ class YSortCameraGroup(pygame.sprite.Group):
                 return sprite.rect.centery - 1000000
             return sprite.rect.centery
         
+        bombers = []
         for sprite in sorted(self.sprites(), key=sprite_order_key):
             offset_pos = sprite.rect.topleft - self.offset
-            if type(sprite) == Player or issubclass(type(sprite), Enemy):
+            if type(sprite) in (Player, Ghost, Sentry, Bomber):
                 self.display_surface.blit(sprite.shadow, offset_pos - self.shadow_offset)
             if type(sprite) == Bomber:
-                offset_pos.y -= 150
-            self.display_surface.blit(sprite.image, offset_pos)
+                #offset_pos.y -= 200
+                bombers.append(sprite)
+            else:
+                self.display_surface.blit(sprite.image, offset_pos)
+            
+        for bomber in bombers:
+            offset_pos = bomber.rect.topleft - self.offset
+            offset_pos.y -= 200
+            self.display_surface.blit(bomber.image, offset_pos)
 
 
 def import_csv_layout(path):

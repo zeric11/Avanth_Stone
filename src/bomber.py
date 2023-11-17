@@ -3,7 +3,7 @@ from entity import Entity
 from enemy import Enemy
 
 class Bomber(Enemy):
-    def __init__(self, pos, groups, obstacle_sprites):
+    def __init__(self, pos, groups, obstacle_sprites=None):
         super().__init__("bomber", pos, groups, obstacle_sprites)
         self.image = self.get_texture_surface("../textures/entities/bomber/0.png")
         
@@ -12,15 +12,15 @@ class Bomber(Enemy):
         self.animation_speed = 0.2
 
         self.health = 100
-        self.speed = 2
-        self.attack_damage = 10
-        self.attack_radius = 50
+        self.speed = 5
+        self.attack_damage = 0
+        self.attack_radius = 10
         self.notice_radius = 500
 
         # player interaction
         self.can_attack = True
         self.attack_time = None
-        self.attack_cooldown = 400
+        self.attack_cooldown = 4000
         
     
     def import_textures(self):
@@ -54,6 +54,16 @@ class Bomber(Enemy):
 
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center = self.hitbox.center)
+        
+        
+    def player_attack_update(self, player):
+        player_distance, player_direction = self.get_player_distance_direction(player)
+        if player_distance < self.attack_radius and self.can_attack:
+            self.attack_time = pygame.time.get_ticks()
+            self.can_attack = False
+            return player_direction
+        else:
+            return None
         
         
     def cooldown(self):

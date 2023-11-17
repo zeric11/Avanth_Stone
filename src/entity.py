@@ -42,7 +42,7 @@ class Entity(pygame.sprite.Sprite):
 
 
     def collision(self, direction):
-        if direction == "horizontal":
+        if direction == "horizontal" and self.obstacle_sprites:
             for sprite in self.obstacle_sprites:
                 if sprite.hitbox.colliderect(self.hitbox):
                     if self.direction.x > 0: # moving right
@@ -50,7 +50,7 @@ class Entity(pygame.sprite.Sprite):
                     elif self.direction.x < 0: # moving left
                         self.hitbox.left = sprite.hitbox.right
 
-        elif direction == "vertical":
+        elif direction == "vertical" and self.obstacle_sprites:
             for sprite in self.obstacle_sprites:
                 if sprite.hitbox.colliderect(self.hitbox):
                     if self.direction.y > 0: # moving down

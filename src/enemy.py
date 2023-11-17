@@ -3,7 +3,7 @@ from entity import Entity
 
 
 class Enemy(Entity):
-    def __init__(self, name, pos, groups, obstacle_sprites):
+    def __init__(self, name, pos, groups, obstacle_sprites=None):
         super().__init__(pos, groups)
         self.sprite_type = "enemy"
         self.enemy_name = name
