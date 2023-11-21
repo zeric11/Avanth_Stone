@@ -3,6 +3,8 @@ from maps import *
 from player import Player
 from enemy import Enemy
 from tile import Tile
+from csv import reader
+from os import walk
 
 
 class Level:
@@ -30,24 +32,83 @@ class Level:
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
 
-
+    
     def create_map(self):
-        for i in range(len(MAP_0)):
-            for j in range(len(MAP_0[0])):
-                item = MAP_0[i][j]
-                if item == "p":
-                    self.player = Player((j * TILE_SIZE, i * TILE_SIZE), 
-                                         [self.visible_sprites], 
-                                         self.obstacle_sprites)
-                elif item == "g":
-                    Enemy("ghost", 
-                          (j * TILE_SIZE, i * TILE_SIZE), 
-                          [self.visible_sprites, self.attackable_sprites], 
-                          self.obstacle_sprites)
-                elif item == "x":
-                    Tile((j * TILE_SIZE, i * TILE_SIZE), 
-                         [self.visible_sprites, self.obstacle_sprites], 
-                         "rock")
+        layouts = {
+            "Entities" : import_csv_layout("../map/map_Entities.csv"),
+            "Objects" : import_csv_layout("../map/map_Objects.csv"),
+            "Decor" : import_csv_layout("../map/map_Decor.csv"),
+            "Shrubs" : import_csv_layout("../map/map_Shrubs.csv"),
+            "Logs" : import_csv_layout("../map/map_Logs.csv"),
+            "Trees" : import_csv_layout("../map/map_Trees.csv"),
+            "Boss door" : import_csv_layout("../map/map_Boss door.csv"),
+            "Water" : import_csv_layout("../map/map_Water.csv"),
+            "Stone border" : import_csv_layout("../map/map_Stone border.csv"),
+            "Border" : import_csv_layout("../map/map_Border.csv"),
+            "Floor" : import_csv_layout("../map/map_Floor.csv"),
+        }
+        nature_textures = import_folder("../textures/nature")
+        print(len(nature_textures))
+        
+        for layer, layout in layouts.items():
+            for i in range(len(layout)):
+                for j in range(len(layout[i])):
+                    item_id = layout[i][j]
+                    x, y = j * 64, i * 64
+                    
+                    if item_id != "-1":
+                        if layer == "Floor":
+                            pass
+                        elif layer in ("Border", "Stone border", "Water", "Boss door"):
+                            Tile((x, y), [self.obstacle_sprites], "invisible")
+                            
+                        elif layer == "Trees":
+                            if item_id in ("80", "81", "82", "83", "84", "85",
+                                           "96", "97", "98", "99", "100", "101",
+                                           "144", "145", "146", "147", "148", "149",
+                                           "160", "161", "162", "163", "164", "165"):
+                                Tile((x,y),[self.visible_sprites], "top layer", nature_textures[int(item_id)])
+                            elif item_id in ("113", "116", "129", "132",
+                                             "177", "180", "193", "196"):
+                                Tile((x,y),[self.visible_sprites, self.obstacle_sprites], "obstacle", nature_textures[int(item_id)])
+                            elif item_id in ("112", "114", "115", "117",
+                                             "176", "178", "179", "181"):
+                                Tile((x,y),[self.visible_sprites], "non obstacle", nature_textures[int(item_id)])
+                            elif item_id in ("128", "130", "131", "133",
+                                             "192", "194", "195", "197"):
+                                Tile((x,y),[self.visible_sprites], "bottom layer", nature_textures[int(item_id)])
+                                
+                        elif layer == "Logs":
+                            if item_id in ("86", "87", "102", "103", "150", "151", "152", "106", "107", "138", "139"):
+                                Tile((x,y),[self.visible_sprites, self.obstacle_sprites], "obstacle", nature_textures[int(item_id)])
+                            elif item_id in ("90", "91", "122", "123"):
+                                Tile((x,y),[self.visible_sprites], "top layer", nature_textures[int(item_id)])
+                                
+                        elif layer == "Shrubs":
+                            if item_id in ("134", "135", "136", "137"):
+                                Tile((x,y),[self.visible_sprites, self.obstacle_sprites], "obstacle", nature_textures[int(item_id)])
+                            elif item_id in ("104", "105", "118", "119", "120", "121"):
+                                Tile((x,y),[self.visible_sprites], "top layer", nature_textures[int(item_id)])
+                            elif item_id in ("88", "89"):
+                                Tile((x,y),[self.visible_sprites], "non obstacle", nature_textures[int(item_id)])
+                                
+                        elif layer == "Objects":
+                            if item_id in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "16", "17", "18"):
+                                Tile((x,y),[self.visible_sprites, self.obstacle_sprites], "obstacle", nature_textures[int(item_id)])
+                            
+                            
+                        elif layer == "Entities":
+                            if item_id == "0":
+                                self.player = Player((x, y), [self.visible_sprites], self.obstacle_sprites)
+                            elif item_id == "1":
+                                Enemy("ghost", (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
+                            elif item_id == "2":
+                                Enemy("ghost", (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
+                            elif item_id == "3":
+                                Enemy("ghost", (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
+                                
+
+    
 
 
 class YSortCameraGroup(pygame.sprite.Group):
@@ -57,13 +118,32 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.half_width = self.display_surface.get_size()[0] // 2
         self.half_height = self.display_surface.get_size()[1] // 2
         self.offset = pygame.math.Vector2()
+        
+        # 1:18:00
+        self.floor_surface = pygame.image.load("../textures/tilemap/map_graphic.png").convert()
+        self.floor_surface = pygame.transform.scale(self.floor_surface, (80 * 64, 80 * 64))
+        self.floor_rect = self.floor_surface.get_rect(topleft=(0,0))
 
 
     def custom_draw(self, player):
         self.offset.x = player.rect.centerx - self.half_width
         self.offset.y = player.rect.centery - self.half_height
+        
+        floor_offset_pos = self.floor_rect.topleft - self.offset
+        self.display_surface.blit(self.floor_surface, floor_offset_pos)
+        
+        #print(self.sprites()[0].sprite_type)
 
-        for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
+        # THIS NEEDS TO BE REPLACED WITH A LAYERING SYSTEM
+        #sprite_order_key = lambda sprite: sprite.rect.centery if sprite.sprite_type != "tree leaves" else sprite.rect.centery + 1000000
+        def sprite_order_key(sprite):
+            if sprite.sprite_type == "top layer":
+                return sprite.rect.centery + 1000000
+            elif sprite.sprite_type == "bottom layer":
+                return sprite.rect.centery - 1000000
+            return sprite.rect.centery
+        
+        for sprite in sorted(self.sprites(), key=sprite_order_key):
             offset_pos = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_pos)
 
@@ -72,3 +152,25 @@ class YSortCameraGroup(pygame.sprite.Group):
         enemy_sprites = [sprite for sprite in self.sprites() if hasattr(sprite, "sprite_type") and sprite.sprite_type == "enemy"]
         for enemy in enemy_sprites:
             enemy.enemy_update(player)
+
+
+def import_csv_layout(path):
+    terrain_map = []
+    with open(path) as level_map:
+        layout = reader(level_map, delimiter=",")
+        for row in layout:
+            terrain_map.append(list(row))
+        return terrain_map
+    
+    
+def import_folder(path):
+    surface_list = []
+
+    for _, __, img_files in walk(path):
+        for image in img_files:
+            full_path = path + "/" + image
+            image_surf = pygame.image.load(full_path).convert_alpha()
+            image_surf = pygame.transform.scale(image_surf, (64, 64))
+            surface_list.append(image_surf)
+
+    return surface_list

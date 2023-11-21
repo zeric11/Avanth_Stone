@@ -5,6 +5,7 @@ from entity import Entity
 class Player(Entity):
     def __init__(self, pos, groups, obstacle_sprites):
         super().__init__(groups)
+        self.sprite_type = "player"
         self.image = self.get_texture_surface("../textures/entities/player/down/stand.png")
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, -20)
@@ -54,8 +55,7 @@ class Player(Entity):
             "right": [self.get_texture_surface(path + "right/step.png"), right_stand],
         }
 
-        
-
+    
 
     def get_input(self):
         keys = pygame.key.get_pressed()
