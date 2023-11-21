@@ -2,6 +2,11 @@ import pygame
 from maps import *
 from player import Player
 from enemy import Enemy
+from ghost import Ghost
+from sentry import Sentry
+from orb import Orb
+from bomber import Bomber
+from meteor import Meteor
 from tile import Tile
 from csv import reader
 from os import walk
@@ -30,7 +35,7 @@ class Level:
         # update and draw the game
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
-        self.visible_sprites.enemy_update(self.player)
+        self.enemy_update(self.player)
 
     
     def create_map(self):
@@ -48,7 +53,6 @@ class Level:
             "Floor" : import_csv_layout("../map/map_Floor.csv"),
         }
         nature_textures = import_folder("../textures/nature")
-        print(len(nature_textures))
         
         for layer, layout in layouts.items():
             for i in range(len(layout)):
@@ -101,16 +105,24 @@ class Level:
                             if item_id == "0":
                                 self.player = Player((x, y), [self.visible_sprites], self.obstacle_sprites)
                             elif item_id == "1":
-                                Enemy("ghost", (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
+                                Ghost((x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
                             elif item_id == "2":
-                                Enemy("ghost", (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
+                                Sentry((x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
                             elif item_id == "3":
-                                Enemy("ghost", (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
+                                Bomber((x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites)
                                 
-
-    
-
-
+    def enemy_update(self, player):
+        enemy_sprites = [sprite for sprite in self.visible_sprites.sprites() if sprite.sprite_type == "enemy"]
+        for enemy in enemy_sprites:
+            is_killed, projectile_direction = enemy.enemy_update(player)
+            if is_killed and type(enemy) not in (Orb, Meteor):
+                print(len(enemy_sprites) - 1, "enemies remain.")
+            if projectile_direction:
+                if type(enemy) == Sentry:
+                    Orb(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites])
+                elif type(enemy) == Bomber:
+                    Meteor(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites])          
+                                
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self):
         super().__init__()
@@ -118,6 +130,8 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.half_width = self.display_surface.get_size()[0] // 2
         self.half_height = self.display_surface.get_size()[1] // 2
         self.offset = pygame.math.Vector2()
+        self.shadow_offset = pygame.math.Vector2()
+        self.shadow_offset.xy = 0, -8
         
         # 1:18:00
         self.floor_surface = pygame.image.load("../textures/tilemap/map_graphic.png").convert()
@@ -143,15 +157,21 @@ class YSortCameraGroup(pygame.sprite.Group):
                 return sprite.rect.centery - 1000000
             return sprite.rect.centery
         
+        bombers = []
         for sprite in sorted(self.sprites(), key=sprite_order_key):
             offset_pos = sprite.rect.topleft - self.offset
-            self.display_surface.blit(sprite.image, offset_pos)
-
-
-    def enemy_update(self, player):
-        enemy_sprites = [sprite for sprite in self.sprites() if hasattr(sprite, "sprite_type") and sprite.sprite_type == "enemy"]
-        for enemy in enemy_sprites:
-            enemy.enemy_update(player)
+            if type(sprite) in (Player, Ghost, Sentry, Bomber):
+                self.display_surface.blit(sprite.shadow, offset_pos - self.shadow_offset)
+            if type(sprite) == Bomber:
+                #offset_pos.y -= 200
+                bombers.append(sprite)
+            else:
+                self.display_surface.blit(sprite.image, offset_pos)
+            
+        for bomber in bombers:
+            offset_pos = bomber.rect.topleft - self.offset
+            offset_pos.y -= 200
+            self.display_surface.blit(bomber.image, offset_pos)
 
 
 def import_csv_layout(path):
