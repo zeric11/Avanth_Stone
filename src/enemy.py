@@ -1,14 +1,20 @@
 import pygame
 from entity import Entity
+from player import Player
 
 
 class Enemy(Entity):
-    def __init__(self, name, pos, groups, obstacle_sprites=None):
-        super().__init__(pos, groups)
-        self.sprite_type = "enemy"
+    def __init__(self, 
+                 name: str,
+                 position: tuple[int, int], 
+                 groups: list[pygame.sprite.Group], 
+                 layer_num: int, 
+                 obstacle_sprites=None) -> None:
+        
+        super().__init__(position, groups, "enemy", layer_num)
         self.enemy_name = name
         self.image = pygame.Surface((64, 64))
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = self.image.get_rect(topleft=position)
         self.hitbox = self.rect.inflate(0, -20)
         self.obstacle_sprites = obstacle_sprites
 
@@ -27,11 +33,11 @@ class Enemy(Entity):
         self.attack_cooldown = 0
 
     
-    def import_textures(self):
+    def import_textures(self) -> None:
         raise NotImplementedError()
 
 
-    def get_player_distance_direction(self, player):
+    def get_player_distance_direction(self, player: Player) -> tuple[pygame.math.Vector2, pygame.math.Vector2]:
         enemy_vec = pygame.math.Vector2(self.rect.center)
         player_vec = pygame.math.Vector2(player.rect.center)
         distance = (player_vec - enemy_vec).magnitude()
@@ -46,7 +52,7 @@ class Enemy(Entity):
         raise NotImplementedError()
 
         
-    def actions(self,player):
+    def actions(self, player):
         raise NotImplementedError()
 
 

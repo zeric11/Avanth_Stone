@@ -1,22 +1,29 @@
 import pygame
 from entity import Entity
+from player import Player
 from enemy import Enemy
 
 
 class Meteor(Enemy):
-    def __init__(self, pos, direction, groups, obstacle_sprites=None):
+    def __init__(self, 
+                 position: tuple[int, int], 
+                 direction: pygame.math.Vector2,
+                 groups: list[pygame.sprite.Group], 
+                 layer_num: int, 
+                 obstacle_sprites=None) -> None:
+        
         starting_position = pygame.Vector2()
-        starting_position.xy = pos[0] - 30, pos[1] - 200
-        super().__init__("meteor", starting_position, groups, obstacle_sprites)
+        starting_position.xy = position[0] - 30, position[1] - 200
+        super().__init__("meteor", starting_position, groups, layer_num, obstacle_sprites)
         self.image = self.get_texture_surface("../textures/entities/meteor/0.png")
         self.import_textures()
         self.animation_speed = 0.2
-        self.final_position = pos
+        self.final_position = position
 
         self.health = 1
         self.speed = 2
         self.attack_damage = 10
-        self.attack_distance = 10
+        self.attack_distance = 15
         self.notice_radius = 0
         #self.direction = direction
         self.direction.xy = 0, 1
@@ -29,7 +36,7 @@ class Meteor(Enemy):
         self.attack_cooldown = 0
         
         
-    def import_textures(self):
+    def import_textures(self) -> None:
         path = "../textures/entities/meteor/"
         self.textures = [
             self.get_texture_surface(path + "0.png"),
@@ -39,13 +46,11 @@ class Meteor(Enemy):
         ]
     
         
-    def get_status(self, player):
-        #player_distance, player_direction = self.get_player_distance_direction(player)
-        #self.direction = player_direction
+    def get_status(self, player: Player) -> None:
         pass
             
             
-    def animate(self):
+    def animate(self) -> None:
         animation = self.textures
    
         self.frame_index += self.animation_speed
@@ -58,7 +63,7 @@ class Meteor(Enemy):
         self.rect = self.image.get_rect(center = self.hitbox.center)
                 
                 
-    def player_attack_update(self, player):
+    def player_attack_update(self, player: Player) -> None:
         player_distance, player_direction = self.get_player_distance_direction(player)
         
         if player_distance < player.attack_distance:
@@ -80,15 +85,10 @@ class Meteor(Enemy):
             self.health = 0
             
     
-    def update(self):
+    def update(self) -> None:
         self.move(self.speed)
         self.animate()
         if self.max_age - self.age < 0:
             self.health = 0
         
 
-
-
-    #def enemy_update(self, player):
-    #    self.get_status(player)
-    #    #self.actions(player)

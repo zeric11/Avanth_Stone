@@ -1,17 +1,25 @@
 import pygame
 from entity import Entity
+from player import Player
 from enemy import Enemy
 
 
 class Orb(Enemy):
-    def __init__(self, pos, direction, groups, obstacle_sprites=None):
-        super().__init__("orb", pos, groups, obstacle_sprites)
+    def __init__(self, 
+                 position: tuple[int, int], 
+                 direction: pygame.math.Vector2,
+                 groups: list[pygame.sprite.Group], 
+                 layer_num: int, 
+                 obstacle_sprites=None) -> None:
+        
+        super().__init__("orb", position, groups, layer_num, obstacle_sprites)
         self.image = self.get_texture_surface("../textures/entities/orb.png")
+        self.image = pygame.transform.scale(self.image, (32, 32))
 
         self.health = 1
         self.speed = 10
         self.attack_damage = 10
-        self.attack_distance = 15
+        self.attack_distance = 25
         self.notice_radius = 0
         self.direction = direction
         self.age = pygame.time.get_ticks()
@@ -22,19 +30,16 @@ class Orb(Enemy):
         self.attack_time = None
         self.attack_cooldown = 0
         
-    
         
-    def get_status(self, player):
-        #player_distance, player_direction = self.get_player_distance_direction(player)
-        #self.direction = player_direction
+    def get_status(self, player: Player) -> None:
         pass
             
             
-    def animate(self):
+    def animate(self) -> None:
         self.rect = self.image.get_rect(center=self.hitbox.center)
                 
                 
-    def player_attack_update(self, player):
+    def player_attack_update(self, player: Player) -> None:
         player_distance, player_direction = self.get_player_distance_direction(player)
         
         if player_distance < player.attack_distance:
@@ -53,15 +58,10 @@ class Orb(Enemy):
             self.health = 0
             
     
-    def update(self):
+    def update(self) -> None:
         self.move(self.speed)
         self.animate()
         if self.max_age - self.age < 0:
             self.health = 0
         
 
-
-
-    #def enemy_update(self, player):
-    #    self.get_status(player)
-    #    #self.actions(player)

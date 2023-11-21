@@ -1,11 +1,17 @@
 import pygame
 from entity import Entity
+from player import Player
 from enemy import Enemy
 
 
 class Sentry(Enemy):
-    def __init__(self, pos, groups, obstacle_sprites=None):
-        super().__init__("sentry", pos, groups, obstacle_sprites)
+    def __init__(self, 
+                 position: tuple[int, int], 
+                 groups: list[pygame.sprite.Group], 
+                 layer_num: int, 
+                 obstacle_sprites=None) -> None:
+        
+        super().__init__("sentry", position, groups, layer_num, obstacle_sprites)
         self.image = self.get_texture_surface("../textures/entities/sentry/down.png")
         
         self.import_textures()
@@ -20,10 +26,10 @@ class Sentry(Enemy):
         # player interaction
         self.can_attack = True
         self.attack_time = None
-        self.attack_cooldown = 10000
+        self.attack_cooldown = 5000
         
     
-    def import_textures(self):
+    def import_textures(self) -> None:
         path = "../textures/entities/sentry/"
         self.textures = {
             "down" : self.get_texture_surface(path + "down.png"),
@@ -33,7 +39,7 @@ class Sentry(Enemy):
         }
         
         
-    def get_status(self, player):
+    def get_status(self, player: Player) -> None:
         player_distance, player_direction = self.get_player_distance_direction(player)
 
         if player_distance > self.notice_radius:
@@ -45,19 +51,19 @@ class Sentry(Enemy):
             self.status = self.get_direction_str()
             
             
-    def animate(self):
+    def animate(self) -> None:
         self.image = self.textures[self.status]
         self.rect = self.image.get_rect(center = self.hitbox.center)
         
         
-    def cooldown(self):
+    def cooldown(self) -> None:
         if not self.can_attack:
             current_time = pygame.time.get_ticks()
             if current_time - self.attack_time >= self.attack_cooldown:
                 self.can_attack = True
                 
                 
-    def player_attack_update(self, player):
+    def player_attack_update(self, player) -> pygame.math.Vector2:
         player_distance, player_direction = self.get_player_distance_direction(player)
         if player_distance < player.attack_distance:
             if player.is_attacking:
@@ -71,15 +77,9 @@ class Sentry(Enemy):
         else:
             return None
                     
-
     
-    def update(self):
+    def update(self) -> None:
         self.move(self.speed)
         self.animate()
         self.cooldown()
 
-
-    #def enemy_update(self, player):
-    #    self.get_status(player)
-    #    #self.actions(player)
-    

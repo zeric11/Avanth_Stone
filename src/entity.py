@@ -1,9 +1,17 @@
 import pygame
+from tile import Tile
 
-class Entity(pygame.sprite.Sprite):
-    def __init__(self, pos, groups):
-        super().__init__(groups)
-        self.position = pos
+class Entity(Tile):
+    def __init__(self, 
+                 position: tuple[int, int], 
+                 groups: list[pygame.sprite.Group], 
+                 sprite_type: str, 
+                 layer_num: int, 
+                 obstacle_sprites=None) -> None:
+        
+        super().__init__(position, groups, "entity", layer_num)
+        self.sprite_type = sprite_type
+        self.obstacle_sprites = obstacle_sprites
         self.frame_index = 0
         self.animation_speed = 0.08
         self.direction = pygame.Vector2()
@@ -14,7 +22,7 @@ class Entity(pygame.sprite.Sprite):
         self.knock_back_direction = 0
 
     
-    def move(self, speed):
+    def move(self, speed: float) -> None:
         if self.knock_back_amount > 0:
             self.move_direction(self.knock_back_speed, self.knock_back_direction)
             self.knock_back_amount -= 1
@@ -25,13 +33,13 @@ class Entity(pygame.sprite.Sprite):
             self.move_direction(speed, self.direction)
 
         
-    def knock_back(self, duration, intensity, direction):
+    def knock_back(self, duration: int, intensity: int, direction: pygame.math.Vector2) -> None:
         self.knock_back_amount = duration
         self.knock_back_speed = intensity
         self.knock_back_direction = direction
     
     
-    def move_direction(self, speed, direction):
+    def move_direction(self, speed: float, direction: pygame.math.Vector2) -> None:
         if direction.magnitude() != 0:
             direction = direction.normalize()
         self.hitbox.x += direction.x * speed
@@ -41,7 +49,7 @@ class Entity(pygame.sprite.Sprite):
         self.rect.center = self.hitbox.center
 
 
-    def collision(self, direction):
+    def collision(self, direction: pygame.math.Vector2) -> None:
         if direction == "horizontal" and self.obstacle_sprites:
             for sprite in self.obstacle_sprites:
                 if sprite.hitbox.colliderect(self.hitbox):
@@ -59,12 +67,12 @@ class Entity(pygame.sprite.Sprite):
                         self.hitbox.top = sprite.hitbox.bottom
 
 
-    def get_texture_surface(self, path):
+    def get_texture_surface(self, path: str) -> pygame.Surface:
         surface = pygame.image.load(path).convert_alpha()
         return pygame.transform.scale(surface, (64, 64))
     
 
-    def remove_actions(self):
+    def remove_actions(self) -> None:
         if "stand" in self.status:
                 self.status = self.status.replace("_stand", "")
         if "attack" in self.status:
@@ -73,8 +81,8 @@ class Entity(pygame.sprite.Sprite):
                 self.status = self.status.replace("_block", "")
                 
                 
-    def get_normalized_direction(self, direction):
-        normalized_direction = pygame.Vector2()
+    def get_normalized_direction(self, direction: pygame.math.Vector2) -> pygame.math.Vector2:
+        normalized_direction = pygame.math.Vector2()
         if abs(direction.x) > abs(direction.y):
             normalized_direction.xy = direction.x, 0
         else:
@@ -84,14 +92,14 @@ class Entity(pygame.sprite.Sprite):
         return normalized_direction
     
     
-    def get_reversed_direction(self, direction):
-        reversed_direction = pygame.Vector2()
+    def get_reversed_direction(self, direction: pygame.math.Vector2) -> pygame.math.Vector2:
+        reversed_direction = pygame.math.Vector2()
         reversed_direction.x = -direction.x if direction.x != 0 else 0
         reversed_direction.y = -direction.y if direction.y != 0 else 0
         return reversed_direction
 
 
-    def get_direction_str(self):
+    def get_direction_str(self) -> str:
         if abs(self.direction.x) > abs(self.direction.y):
             if self.direction.x > 0:
                 return "right"
