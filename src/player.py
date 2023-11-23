@@ -3,27 +3,34 @@ from entity import Entity
 
 
 class Player(Entity):
-    def __init__(self, pos, groups, obstacle_sprites):
-        super().__init__(groups)
-        self.sprite_type = "player"
+    def __init__(self, 
+                 position: tuple[int, int], 
+                 groups: list[pygame.sprite.Group], 
+                 layer_num: int, 
+                 obstacle_sprites=None) -> None:
+        
+        super().__init__(position, groups, "player", layer_num)
         self.image = self.get_texture_surface("../textures/entities/player/down/stand.png")
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = self.image.get_rect(topleft=position)
         self.hitbox = self.rect.inflate(0, -20)
         self.obstacle_sprites = obstacle_sprites
 
         self.import_player_textures()
         self.status = "down_stand"
         
-        self.speed = 5
-        self.blocking = False
-        self.attacking = False
-        self.attack_duration = 300
+        self.health = 100
+        self.speed = 7
+        self.is_blocking = False
+        self.attack_damage = 10
+        self.attack_distance = 100
+        self.is_attacking = False
+        self.attack_duration = 50
         self.attack_cooldown = 500
         self.attack_start_time = 0
         self.attack_end_time = 0
 
 
-    def import_player_textures(self):
+    def import_player_textures(self) -> None:
         path = "../textures/entities/player/"
 
         down_stand = self.get_texture_surface(path + "down/stand.png")
@@ -55,20 +62,19 @@ class Player(Entity):
             "right": [self.get_texture_surface(path + "right/step.png"), right_stand],
         }
 
-    
 
-    def get_input(self):
+    def get_input(self) -> None:
         keys = pygame.key.get_pressed()
-        self.blocking = False
+        self.is_blocking = False
 
         # Abilities input
-        if not self.attacking and keys[pygame.K_z]:
-            self.attacking = True
+        if not self.is_attacking and keys[pygame.K_z]:
+            self.is_attacking = True
             self.attack_start_time = pygame.time.get_ticks()
 
         if keys[pygame.K_x]:
-            self.attacking = False
-            self.blocking = True
+            self.is_attacking = False
+            self.is_blocking = True
 
         # Movement input
         if keys[pygame.K_UP]:
@@ -90,51 +96,55 @@ class Player(Entity):
             self.direction.x = 0
 
         
-    def get_status(self):
-        if self.blocking:
+    def get_status(self) -> None:
+        if self.is_blocking:
             self.direction.x = 0
             self.direction.y = 0
-            self.attacking = False
-            if not "block" in self.status:
-                if "stand" in self.status:
-                    self.status = self.status.replace("_stand", "_block")
-                elif "attack" in self.status:
-                    self.status = self.status.replace("_attack", "_block")
-                else:
-                    self.status += "_block"
+            self.is_attacking = False
+            
+            self.remove_actions()
+            self.status += "_block"
 
-        elif self.attacking:
+        elif self.is_attacking:
             self.direction.x = 0
             self.direction.y = 0
-            if not "attack" in self.status:
-                if "stand" in self.status:
-                    self.status = self.status.replace("_stand", "_attack")
-                elif "block" in self.status:
-                    self.status = self.status.replace("_block", "_attack")
-                else:
-                    self.status += "_attack"
+
+            self.remove_actions()
+            self.status += "_attack"
 
         else:
-            if "attack" in self.status:
-                self.status = self.status.replace("_attack", "")
-            if "block" in self.status:
-                self.status = self.status.replace("_block", "")
-            if self.direction.x == 0 and self.direction.y == 0 and "stand" not in self.status:
+            self.remove_actions()
+            if self.direction.x == 0 and self.direction.y == 0:
                 self.status += "_stand"
+                
+                
+    def get_direction_facing(self) -> pygame.Vector2:
+        if self.direction.x != 0 or self.direction.y != 0:
+            return self.direction
+        direction = pygame.Vector2()
+        if "down" in self.status:
+            direction.xy = 0, 1
+        elif "up" in self.status:
+            direction.xy = 0, -1
+        elif "left" in self.status:
+            direction.xy = -1, 0
+        elif "right" in self.status:
+            direction.xy = 1, 0
+        return direction
+         
 
-
-    def cooldowns(self):
+    def cooldowns(self) -> None:
         current_time = pygame.time.get_ticks()
 
-        if self.attacking and current_time - self.attack_start_time >= self.attack_duration:
-            self.attacking = False
+        if self.is_attacking and current_time - self.attack_start_time >= self.attack_duration:
+            self.is_attacking = False
             self.attack_end_time = pygame.time.get_ticks()
 
-        if self.attacking and current_time - self.attack_end_time < self.attack_cooldown:
-            self.attacking = False
+        if self.is_attacking and current_time - self.attack_end_time < self.attack_cooldown:
+            self.is_attacking = False
             
 
-    def animate(self):
+    def animate(self) -> None:
         animation = self.textures[self.status]
 
         self.frame_index += self.animation_speed
@@ -145,9 +155,16 @@ class Player(Entity):
         self.rect = self.image.get_rect(center=self.hitbox.center)
             
             
-    def update(self):
+    def update(self) -> bool:
         self.get_input()
         self.cooldowns()
         self.get_status()
         self.animate()
         self.move(self.speed)
+        if self.health <= 0:
+            self.kill()
+            return True        
+        return False
+    
+        
+
