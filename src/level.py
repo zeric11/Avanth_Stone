@@ -28,14 +28,20 @@ class Level:
         self.create_map()
 
 
+    # Returns where player has died or not.
     def run(self) -> None:
         # update and draw the game
         self.visible_sprites.custom_draw(self.player)
+        self.draw_hearts()
+        self.draw_score()
         self.visible_sprites.update()
         self.enemy_update()
+        if self.player.health <= 0:
+            return True
 
     
     def create_map(self) -> None:
+        self.ui_textures = import_folder("../textures/ui")
         textures = import_folder("../textures/nature")
         for layer, layout in layouts.items():
             for i in range(len(layout)):
@@ -103,13 +109,30 @@ class Level:
         enemy_sprites = [sprite for sprite in self.visible_sprites.sprites() if sprite.sprite_type == "enemy"]
         for enemy in enemy_sprites:
             is_killed, projectile_direction = enemy.enemy_update(self.player)
-            if is_killed and type(enemy) not in (Orb, Meteor):
-                print(len(enemy_sprites) - 1, "enemies remain.")
+            #if is_killed and type(enemy) not in (Orb, Meteor):
+            #    print(len(enemy_sprites) - 1, "enemies remain.")
             if projectile_direction:
                 if type(enemy) == Sentry:
                     Orb(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=2)
                 elif type(enemy) == Bomber:
-                    Meteor(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=3)          
+                    Meteor(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=3)     
+                    
+                    
+    def draw_hearts(self) -> None:
+        for i in range(10):
+            #print(self.player.health)
+            heart_surface = pygame.transform.scale(self.ui_textures[11 if self.player.health - i > 0 else 10], (32, 32))
+            self.display_surface.blit(heart_surface, (4 + (i * 38), 4))
+            
+            
+    def draw_score(self) -> None:
+        enemies_remaining = len([sprite for sprite in self.visible_sprites.sprites() if type(sprite) in (Ghost, Sentry, Bomber)])
+        enemies_remaining_str = str(enemies_remaining)
+        digit_amount = len(enemies_remaining_str)
+        for i in range(digit_amount):
+            digit_surface = self.ui_textures[int(enemies_remaining_str[digit_amount - 1 - i])]
+            digit_surface = pygame.transform.scale(digit_surface, (32, 32))
+            self.display_surface.blit(digit_surface, (1920 - 32 - (i * 32), 4))
                                 
                                 
 class YSortCameraGroup(pygame.sprite.Group):
@@ -150,4 +173,5 @@ class YSortCameraGroup(pygame.sprite.Group):
             if type(sprite) == Bomber:
                 offset_pos.y -= 200
             self.display_surface.blit(sprite.image, offset_pos)
+        
 

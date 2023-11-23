@@ -7,6 +7,8 @@ S_HEIGHT = 1080
 FPS = 60
 
 
+
+
 if __name__ == "__main__":
     pygame.init()
     screen = pygame.display.set_mode((S_WIDTH, S_HEIGHT))

@@ -18,7 +18,7 @@ class Bomber(Enemy):
         self.status = "stand"
         self.animation_speed = 0.2
 
-        self.health = 100
+        self.health = 10
         self.speed = 5
         self.attack_damage = 0
         self.attack_radius = 10

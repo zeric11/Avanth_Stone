@@ -17,7 +17,7 @@ class Sentry(Enemy):
         self.import_textures()
         self.status = "down"
 
-        self.health = 100
+        self.health = 5
         self.speed = 0
         self.attack_damage = 0
         self.attack_radius = 1000

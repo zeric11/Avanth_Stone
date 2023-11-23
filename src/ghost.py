@@ -17,9 +17,9 @@ class Ghost(Enemy):
         self.import_textures()
         self.status = "down_stand"
 
-        self.health = 100
+        self.health = 5
         self.speed = 2
-        self.attack_damage = 10
+        self.attack_damage = 1
         self.attack_distance = 5
         self.notice_radius = 500
 

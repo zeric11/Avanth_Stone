@@ -18,7 +18,7 @@ class Orb(Enemy):
 
         self.health = 1
         self.speed = 10
-        self.attack_damage = 10
+        self.attack_damage = 1
         self.attack_distance = 25
         self.notice_radius = 0
         self.direction = direction
