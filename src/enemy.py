@@ -31,6 +31,10 @@ class Enemy(Entity):
         self.can_attack = False
         self.attack_time = None
         self.attack_cooldown = 0
+        
+        self.damage_sound = None
+        self.idle_sound = None
+        self.killed_sound = None
 
     
     def import_textures(self) -> None:
@@ -64,6 +68,25 @@ class Enemy(Entity):
         raise NotImplementedError()
     
     
+    def killed_update(self):
+        if self.health <= 0:
+            if self.idle_sound:
+                self.idle_sound.stop()
+            if self.killed_sound:
+                self.killed_sound.play()
+    
+    
+    def take_damage(self, damage_amount: float) -> None:
+        self.health -= damage_amount
+        if self.damage_sound and self.damage_sound.get_num_channels() < 1:
+            self.damage_sound.play()
+            
+            
+    def play_idle_sound(self) -> None:
+        if self.idle_sound and self.idle_sound.get_num_channels() < 1:
+            self.idle_sound.play()
+    
+    
     def player_attack_update(self, player):
         player_distance, player_direction = self.get_player_distance_direction(player)
         if player_distance < player.attack_distance:
@@ -76,6 +99,7 @@ class Enemy(Entity):
         self.move(self.speed)
         self.animate()
         self.cooldown()
+        self.play_idle_sound()
 
 
     # Returns whether or not the sprite has been killed and the direction of a launched orb.
@@ -84,6 +108,7 @@ class Enemy(Entity):
         orb_direction = self.player_attack_update(player)
         is_killed = False
         if self.health <= 0:
+            self.killed_update()
             self.kill()
             is_killed = True        
         return (is_killed, orb_direction)

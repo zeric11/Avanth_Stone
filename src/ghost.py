@@ -28,6 +28,11 @@ class Ghost(Enemy):
         self.attack_time = None
         self.attack_cooldown = 400
         
+        self.damage_sound = pygame.mixer.Sound("../audio/mixkit-explainer-video-game-alert-sweep-236.wav")
+        self.damage_sound.set_volume(1)
+        
+        self.killed_sound = pygame.mixer.Sound("../audio/mixkit-failure-arcade-alert-notification-240.wav")
+        
     
     def import_textures(self) -> None:
         path = "../textures/entities/ghost/"
@@ -63,7 +68,7 @@ class Ghost(Enemy):
     def get_status(self, player: Player) -> None:
         player_distance, player_direction = self.get_player_distance_direction(player)
 
-        if player_distance > self.notice_radius:
+        if player_distance > self.notice_radius or player.health <= 0:
             self.direction.xy = 0, 0
             self.status = "down"
 
@@ -98,15 +103,16 @@ class Ghost(Enemy):
         if player_distance < player.attack_distance:
             if player.is_attacking:
                 if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
-                    self.health -= player.attack_damage
+                    self.take_damage(player.attack_damage)
                     self.knock_back(10, 10, self.get_reversed_direction(player_direction))
                     
-        if player_distance < self.attack_distance and self.can_attack:
+        if player_distance < self.attack_distance and self.can_attack and player.health > 0:
             if player.is_blocking and self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5:
+                player.block_damage()
                 player.knock_back(10, 10, player_direction)
                 self.knock_back(10, 5, self.get_reversed_direction(player_direction))
             else:
-                player.health -= self.attack_damage
+                player.take_damage(self.attack_damage)
                 player.knock_back(10, 10, player_direction)
                 
             self.attack_time = pygame.time.get_ticks()

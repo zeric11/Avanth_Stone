@@ -35,6 +35,12 @@ class Meteor(Enemy):
         self.attack_time = None
         self.attack_cooldown = 0
         
+        self.killed_sound = pygame.mixer.Sound("../audio/mixkit-8-bit-bomb-explosion-2811.wav")
+        self.killed_sound.set_volume(0.1)
+        
+        self.idle_sound = pygame.mixer.Sound("../audio/mixkit-long-game-over-notification-276.wav")
+        self.idle_sound.set_volume(0.1)
+        
         
     def import_textures(self) -> None:
         path = "../textures/entities/meteor/"
@@ -73,22 +79,25 @@ class Meteor(Enemy):
                     
         if player_distance < self.attack_distance:
             if player.is_blocking and self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5:
+                player.block_damage()
                 player.knock_back(10, 10, player_direction)
 
             else:
-                player.health -= self.attack_damage
+                player.take_damage(self.attack_damage)
                 player.knock_back(10, 10, player_direction)
-                pygame.time.get_ticks()
+                
+            #self.explosion_sound.play()
             self.health = 0
             
-        if self.hitbox.center[1] >= self.final_position[1]:
+        elif self.hitbox.center[1] >= self.final_position[1]:
             self.health = 0
+            #elf.explosion_sound.play()
             
-    
+            
     def update(self) -> None:
         self.move(self.speed)
         self.animate()
-        if self.max_age - self.age < 0:
-            self.health = 0
+        self.play_idle_sound()
+
         
 

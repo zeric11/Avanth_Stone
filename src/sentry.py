@@ -28,6 +28,10 @@ class Sentry(Enemy):
         self.attack_time = None
         self.attack_cooldown = 5000
         
+        self.killed_sound = pygame.mixer.Sound("../audio/mixkit-sword-strikes-armor-2765.wav")
+
+        self.damage_sound = pygame.mixer.Sound("../audio/mixkit-weak-hit-impact-2148.wav")
+        
     
     def import_textures(self) -> None:
         path = "../textures/entities/sentry/"
@@ -68,9 +72,9 @@ class Sentry(Enemy):
         if player_distance < player.attack_distance:
             if player.is_attacking:
                 if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
-                    self.health -= player.attack_damage
+                    self.take_damage(player.attack_damage)
                     
-        if player_distance < self.attack_radius and self.can_attack:
+        if player_distance < self.attack_radius and self.can_attack and player.health > 0:
             self.attack_time = pygame.time.get_ticks()
             self.can_attack = False
             return player_direction

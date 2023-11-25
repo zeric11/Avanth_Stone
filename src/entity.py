@@ -111,5 +111,6 @@ class Entity(Tile):
             else:
                 return "up"
             
+            
              
             

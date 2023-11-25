@@ -42,7 +42,7 @@ class Bomber(Enemy):
     def get_status(self, player: Player) -> None:
         player_distance, player_direction = self.get_player_distance_direction(player)
 
-        if player_distance > self.notice_radius:
+        if player_distance > self.notice_radius or player.health <= 0:
             self.direction.xy = 0, 0
             self.status = "stand"
 
@@ -66,7 +66,7 @@ class Bomber(Enemy):
         
     def player_attack_update(self, player: Player) -> None:
         player_distance, player_direction = self.get_player_distance_direction(player)
-        if player_distance < self.attack_radius and self.can_attack:
+        if player_distance < self.attack_radius and self.can_attack and player.health > 0:
             self.attack_time = pygame.time.get_ticks()
             self.can_attack = False
             return player_direction
