@@ -37,22 +37,22 @@ class Enemy(Entity):
         raise NotImplementedError()
 
 
-    def get_player_distance_direction(self, player: Player) -> tuple[pygame.math.Vector2, pygame.math.Vector2]:
+    def get_entity_distance_direction(self, entity: Entity) -> tuple[pygame.math.Vector2, pygame.math.Vector2]:
         enemy_vec = pygame.math.Vector2(self.rect.center)
-        player_vec = pygame.math.Vector2(player.rect.center)
-        distance = (player_vec - enemy_vec).magnitude()
+        entity_vec = pygame.math.Vector2(entity.rect.center)
+        distance = (entity_vec - enemy_vec).magnitude()
         if distance > 0:
-            direction = (player_vec - enemy_vec).normalize()
+            direction = (entity_vec - enemy_vec).normalize()
         else:
             direction = pygame.math.Vector2()
         return (distance, direction)
 
 
-    def get_status(self, player):
+    def update_status(self, player: Player) -> None:
         raise NotImplementedError()
 
         
-    def actions(self, player):
+    def actions(self, player: Player):
         raise NotImplementedError()
 
 
@@ -64,15 +64,23 @@ class Enemy(Entity):
         raise NotImplementedError()
     
     
-    def player_attack_update(self, player):
-        player_distance, player_direction = self.get_player_distance_direction(player)
+    def player_attack_update(self, player: Player) -> None:
+        player_distance, player_direction = self.get_entity_distance_direction(player)
         if player_distance < player.attack_distance:
             if player.is_attacking:
                 if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
                     self.health -= player.attack_damage
+        
+        
+    def boomerang_attack_update(self, player: Player) -> None:
+        if player.boomerang and self.enemy_name != "boomerang":    
+            boomerang_distance, boomerang_direction = self.get_entity_distance_direction(player.boomerang)
+            if boomerang_distance < player.boomerang.attack_distance: 
+                self.health -= player.boomerang.attack_damage
+                player.boomerang.max_age = 0
                     
     
-    def update(self):
+    def update(self) -> None:
         self.move(self.speed)
         self.animate()
         self.cooldown()
@@ -80,10 +88,11 @@ class Enemy(Entity):
 
     # Returns whether or not the sprite has been killed and the direction of a launched orb.
     def enemy_update(self, player):
-        self.get_status(player)
-        orb_direction = self.player_attack_update(player)
+        self.update_status(player)
+        projectile_direction = self.player_attack_update(player)
+        self.boomerang_attack_update(player)
         is_killed = False
         if self.health <= 0:
             self.kill()
             is_killed = True        
-        return (is_killed, orb_direction)
+        return (is_killed, projectile_direction)

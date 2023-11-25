@@ -39,8 +39,8 @@ class Bomber(Enemy):
         ]
         
         
-    def get_status(self, player: Player) -> None:
-        player_distance, player_direction = self.get_player_distance_direction(player)
+    def update_status(self, player: Player) -> None:
+        player_distance, player_direction = self.get_entity_distance_direction(player)
 
         if player_distance > self.notice_radius:
             self.direction.xy = 0, 0
@@ -65,13 +65,24 @@ class Bomber(Enemy):
         
         
     def player_attack_update(self, player: Player) -> None:
-        player_distance, player_direction = self.get_player_distance_direction(player)
+        player_distance, player_direction = self.get_entity_distance_direction(player)
         if player_distance < self.attack_radius and self.can_attack:
             self.attack_time = pygame.time.get_ticks()
             self.can_attack = False
             return player_direction
         else:
             return None
+        
+        
+    def boomerang_attack_update(self, player: Player) -> None:
+        if player.boomerang:  
+            original_position = self.rect.center
+            self.rect.center = (original_position[0], original_position[1] - 200)
+            boomerang_distance, boomerang_direction = self.get_entity_distance_direction(player.boomerang)
+            self.rect.center = original_position
+            if boomerang_distance < player.boomerang.attack_distance: 
+                self.health -= player.boomerang.attack_damage
+                player.boomerang.max_age = 0
         
         
     def cooldown(self) -> None:

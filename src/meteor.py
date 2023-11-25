@@ -46,7 +46,7 @@ class Meteor(Enemy):
         ]
     
         
-    def get_status(self, player: Player) -> None:
+    def update_status(self, player: Player) -> None:
         pass
             
             
@@ -64,7 +64,7 @@ class Meteor(Enemy):
                 
                 
     def player_attack_update(self, player: Player) -> None:
-        player_distance, player_direction = self.get_player_distance_direction(player)
+        player_distance, player_direction = self.get_entity_distance_direction(player)
         
         if player_distance < player.attack_distance:
             if player.is_attacking:

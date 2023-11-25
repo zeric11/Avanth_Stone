@@ -1,5 +1,6 @@
 import pygame
 from player import Player
+from boomerang import Boomerang
 from enemy import Enemy
 from ghost import Ghost
 from sentry import Sentry
@@ -33,6 +34,7 @@ class Level:
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         self.enemy_update()
+        self.boomerang_update()
 
     
     def create_map(self) -> None:
@@ -109,7 +111,18 @@ class Level:
                 if type(enemy) == Sentry:
                     Orb(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=2)
                 elif type(enemy) == Bomber:
-                    Meteor(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=3)          
+                    Meteor(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=3) 
+    
+    def boomerang_update(self) -> None:
+        if self.player.boomerang_staged and not self.player.boomerang_thrown:
+            self.player.boomerang = Boomerang(
+                (self.player.hitbox.center[0] - 30, self.player.hitbox.center[1] - 10), 
+                self.player.get_direction_facing(), 
+                [self.visible_sprites, self.attackable_sprites], 
+                layer_num=3
+            )
+            self.player.boomerang_staged = False
+            self.player.boomerang_thrown = True
                                 
                                 
 class YSortCameraGroup(pygame.sprite.Group):

@@ -22,8 +22,8 @@ class Orb(Enemy):
         self.attack_distance = 25
         self.notice_radius = 0
         self.direction = direction
-        self.age = pygame.time.get_ticks()
-        self.max_age = 1000000
+        self.start_age = pygame.time.get_ticks()
+        self.max_age = 10000
 
         # player interaction
         self.can_attack = True
@@ -31,7 +31,7 @@ class Orb(Enemy):
         self.attack_cooldown = 0
         
         
-    def get_status(self, player: Player) -> None:
+    def update_status(self, player: Player) -> None:
         pass
             
             
@@ -40,7 +40,7 @@ class Orb(Enemy):
                 
                 
     def player_attack_update(self, player: Player) -> None:
-        player_distance, player_direction = self.get_player_distance_direction(player)
+        player_distance, player_direction = self.get_entity_distance_direction(player)
         
         if player_distance < player.attack_distance:
             if player.is_attacking:
@@ -54,14 +54,13 @@ class Orb(Enemy):
             else:
                 player.health -= self.attack_damage
                 player.knock_back(10, 10, player_direction)
-                pygame.time.get_ticks()
             self.health = 0
             
     
     def update(self) -> None:
         self.move(self.speed)
         self.animate()
-        if self.max_age - self.age < 0:
+        if pygame.time.get_ticks() - self.start_age >= self.max_age:
             self.health = 0
         
 
