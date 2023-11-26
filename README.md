@@ -11,4 +11,10 @@ The goal for this project is to implement a variety of 2D gameplay mechanics. Th
 
 Due to its simplicity and my familiarity with the language, this game will be written in Python using the [Pygame](https://www.pygame.org/wiki/about) library.
 
-This project will be based on [this Pygame tutorial](https://www.youtube.com/watch?v=QU1pPzEGrqw).
+This project will be based on this [Pygame tutorial](https://www.youtube.com/watch?v=QU1pPzEGrqw).
+
+Map textures are from the [Mystic Woods](https://game-endeavor.itch.io/mystic-woods) asset pack.
+
+Sound effects are from [Mixkil](https://mixkit.co/free-sound-effects).
+
+Background music: [Forest Walk by Alexander Nakarada](https://www.chosic.com/download-audio/28063/). 

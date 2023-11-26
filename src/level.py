@@ -172,6 +172,6 @@ class YSortCameraGroup(pygame.sprite.Group):
             # Bomber needs to appear high above its shadow.
             if type(sprite) == Bomber:
                 offset_pos.y -= 200
-            self.display_surface.blit(sprite.image, offset_pos)
+            self.display_surface.blit(sprite.display_image, offset_pos)
         
 

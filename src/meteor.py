@@ -16,6 +16,7 @@ class Meteor(Enemy):
         starting_position.xy = position[0] - 30, position[1] - 200
         super().__init__("meteor", starting_position, groups, layer_num, obstacle_sprites)
         self.image = self.get_texture_surface("../textures/entities/meteor/0.png")
+        self.display_image = self.image.copy()
         self.import_textures()
         self.animation_speed = 0.2
         self.final_position = position
@@ -34,6 +35,12 @@ class Meteor(Enemy):
         self.can_attack = True
         self.attack_time = None
         self.attack_cooldown = 0
+        
+        self.killed_sound = pygame.mixer.Sound("../audio/mixkit-8-bit-bomb-explosion-2811.wav")
+        self.killed_sound.set_volume(0.1)
+        
+        self.idle_sound = pygame.mixer.Sound("../audio/mixkit-long-game-over-notification-276.wav")
+        self.idle_sound.set_volume(0.1)
         
         
     def import_textures(self) -> None:
@@ -61,6 +68,8 @@ class Meteor(Enemy):
 
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center = self.hitbox.center)
+        
+        self.display_image = self.image.copy()
                 
                 
     def player_attack_update(self, player: Player) -> None:
@@ -73,22 +82,21 @@ class Meteor(Enemy):
                     
         if player_distance < self.attack_distance:
             if player.is_blocking and self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5:
+                player.block_damage()
                 player.knock_back(10, 10, player_direction)
 
             else:
-                player.health -= self.attack_damage
+                player.take_damage(self.attack_damage)
                 player.knock_back(10, 10, player_direction)
-                pygame.time.get_ticks()
+                
+            #self.explosion_sound.play()
             self.health = 0
             
-        if self.hitbox.center[1] >= self.final_position[1]:
+        elif self.hitbox.center[1] >= self.final_position[1]:
             self.health = 0
+            #elf.explosion_sound.play()
             
-    
-    def update(self) -> None:
-        self.move(self.speed)
-        self.animate()
-        if self.max_age - self.age < 0:
-            self.health = 0
+
+
         
 

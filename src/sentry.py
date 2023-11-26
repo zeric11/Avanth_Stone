@@ -13,6 +13,7 @@ class Sentry(Enemy):
         
         super().__init__("sentry", position, groups, layer_num, obstacle_sprites)
         self.image = self.get_texture_surface("../textures/entities/sentry/down.png")
+        self.display_image = self.image.copy()
         
         self.import_textures()
         self.status = "down"
@@ -27,6 +28,10 @@ class Sentry(Enemy):
         self.can_attack = True
         self.attack_time = None
         self.attack_cooldown = 5000
+        
+        self.killed_sound = pygame.mixer.Sound("../audio/mixkit-sword-strikes-armor-2765.wav")
+
+        self.damage_sound = pygame.mixer.Sound("../audio/mixkit-weak-hit-impact-2148.wav")
         
     
     def import_textures(self) -> None:
@@ -55,6 +60,11 @@ class Sentry(Enemy):
         self.image = self.textures[self.status]
         self.rect = self.image.get_rect(center = self.hitbox.center)
         
+        self.display_image = self.image.copy()
+        if self.damage_taken:
+            self.display_image.fill((255, 0, 0), special_flags=pygame.BLEND_MULT)
+            self.damage_taken = False
+        
         
     def cooldown(self) -> None:
         if not self.can_attack:
@@ -68,18 +78,14 @@ class Sentry(Enemy):
         if player_distance < player.attack_distance:
             if player.is_attacking:
                 if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
-                    self.health -= player.attack_damage
+                    self.take_damage(player.attack_damage)
                     
-        if player_distance < self.attack_radius and self.can_attack:
+        if player_distance < self.attack_radius and self.can_attack and player.health > 0:
             self.attack_time = pygame.time.get_ticks()
             self.can_attack = False
             return player_direction
         else:
             return None
                     
-    
-    def update(self) -> None:
-        self.move(self.speed)
-        self.animate()
-        self.cooldown()
+
 
