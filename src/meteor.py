@@ -18,7 +18,7 @@ class Meteor(Enemy):
         self.image = self.get_texture_surface("../textures/entities/meteor/0.png")
         self.display_image = self.image.copy()
         self.import_textures()
-        self.animation_speed = 0.2
+        self.animation_speed = 0.15
         self.final_position = position
 
         self.health = 1
@@ -89,12 +89,12 @@ class Meteor(Enemy):
                 player.take_damage(self.attack_damage)
                 player.knock_back(10, 10, player_direction)
                 
-            #self.explosion_sound.play()
             self.health = 0
             
         elif self.hitbox.center[1] >= self.final_position[1]:
             self.health = 0
-            #elf.explosion_sound.play()
+            
+
             
 
 

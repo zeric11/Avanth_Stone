@@ -6,6 +6,8 @@ from sentry import Sentry
 from orb import Orb
 from bomber import Bomber
 from meteor import Meteor
+from explosion_effect import ExplosionEffect
+from killed_effect import KilledEffect
 from tile import *
 
 
@@ -34,7 +36,7 @@ class Level:
         self.visible_sprites.custom_draw(self.player)
         self.draw_hearts()
         self.draw_score()
-        self.visible_sprites.update()
+        self.update()
         self.enemy_update()
         if self.player.health <= 0:
             return True
@@ -103,19 +105,29 @@ class Level:
                 Sentry(position, [self.visible_sprites, self.attackable_sprites], layer_num=1, obstacle_sprites=self.obstacle_sprites)
             elif tile_id == tilemap_indices["entities - bomber"]:
                 Bomber(position, [self.visible_sprites, self.attackable_sprites], layer_num=3)
-                
+    
+    
+    def update(self) -> None:
+        for sprite in self.visible_sprites:
+            is_killed = sprite.update()
+            if is_killed:
+                if type(sprite) == Meteor:
+                    ExplosionEffect((sprite.hitbox.x, sprite.hitbox.y + 10), [self.visible_sprites], layer_num=1)
+                if type(sprite) in (Player, Ghost, Sentry, Bomber):
+                    KilledEffect((sprite.hitbox.x, sprite.hitbox.y + 10), [self.visible_sprites], layer_num=1)
+              
                                 
     def enemy_update(self) -> None:
         enemy_sprites = [sprite for sprite in self.visible_sprites.sprites() if sprite.sprite_type == "enemy"]
         for enemy in enemy_sprites:
-            is_killed, projectile_direction = enemy.enemy_update(self.player)
+            projectile_direction = enemy.enemy_update(self.player)
             #if is_killed and type(enemy) not in (Orb, Meteor):
             #    print(len(enemy_sprites) - 1, "enemies remain.")
             if projectile_direction:
                 if type(enemy) == Sentry:
-                    Orb(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=2)
+                    Orb(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=1)
                 elif type(enemy) == Bomber:
-                    Meteor(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=3)     
+                    Meteor(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=1)     
                     
                     
     def draw_hearts(self) -> None:
@@ -173,5 +185,8 @@ class YSortCameraGroup(pygame.sprite.Group):
             if type(sprite) == Bomber:
                 offset_pos.y -= 200
             self.display_surface.blit(sprite.display_image, offset_pos)
+            
+                
+            
         
 

@@ -33,6 +33,8 @@ class Enemy(Entity):
         self.attack_time = None
         self.attack_cooldown = 0
         self.damage_taken = False
+        self.stun_amount = 50
+        self.stun_remaining = 0
         
         self.damage_sound = None
         self.idle_sound = None
@@ -81,6 +83,7 @@ class Enemy(Entity):
     def take_damage(self, damage_amount: float) -> None:
         self.health -= damage_amount
         self.damage_taken = True
+        self.stun_remaining = self.stun_amount
         if self.damage_sound and self.damage_sound.get_num_channels() < 1:
             self.damage_sound.play()
             
@@ -97,21 +100,33 @@ class Enemy(Entity):
                 if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
                     self.take_damage(player.attack_damage)
                     
+                    
+    def move(self, speed: float) -> None:
+        if self.knock_back_amount > 0:
+            self.move_direction(self.knock_back_speed, self.knock_back_direction)
+            self.knock_back_amount -= 1
+            if self.knock_back_amount == 0:
+                self.knock_back_speed = 0
+                self.knock_back_direction = 0
+        elif self.stun_remaining > 0:
+            self.stun_remaining -= 1
+        else:
+            self.move_direction(speed, self.direction)
+    
     
     def update(self):
         self.move(self.speed)
         self.animate()
         self.cooldown()
         self.play_idle_sound()
+        if self.health <= 0:
+            self.killed_update()
+            self.kill()   
+            return True
+        return False
 
 
     # Returns whether or not the sprite has been killed and the direction of a launched orb.
     def enemy_update(self, player):
         self.get_status(player)
-        orb_direction = self.player_attack_update(player)
-        is_killed = False
-        if self.health <= 0:
-            self.killed_update()
-            self.kill()
-            is_killed = True        
-        return (is_killed, orb_direction)
+        return self.player_attack_update(player)  
