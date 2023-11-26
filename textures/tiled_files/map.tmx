@@ -11,10 +11,6 @@
  <tileset firstgid="318" source="../tiled_files/decor_16x16.tsx"/>
  <tileset firstgid="338" source="../tiled_files/wooden_door_b.tsx"/>
  <tileset firstgid="340" source="../tiled_files/walls.tsx"/>
- <tileset firstgid="404" source="player_tile.tsx"/>
- <tileset firstgid="404" source="ghost_tile.tsx"/>
- <tileset firstgid="404" source="sentry_tile.tsx"/>
- <tileset firstgid="404" source="bomber_tile.tsx"/>
  <tileset firstgid="404" source="../tiled_files/entities.tsx"/>
  <layer id="1" name="Floor" width="80" height="80">
   <data encoding="csv">
