@@ -137,5 +137,6 @@ class Enemy(Entity):
 
     # Returns whether or not the sprite has been killed and the direction of a launched orb.
     def enemy_update(self, player):
-        self.get_status(player)
+        self.update_status(player)
+        self.boomerang_attack_update(player)
         return self.player_attack_update(player)  

@@ -19,7 +19,7 @@ class Bomber(Enemy):
         self.status = "stand"
         self.animation_speed = 0.2
 
-        self.health = 10
+        self.health = 5
         self.speed = 5
         self.attack_damage = 0
         self.attack_radius = 10
@@ -29,6 +29,11 @@ class Bomber(Enemy):
         self.can_attack = True
         self.attack_time = None
         self.attack_cooldown = 4000
+        
+        self.damage_sound = pygame.mixer.Sound("../audio/mixkit-weak-fast-blow-2145.wav")
+        self.damage_sound.set_volume(1)
+        
+        self.killed_sound = pygame.mixer.Sound("../audio/mixkit-video-game-power-up-3164.wav")
         
     
     def import_textures(self) -> None:
@@ -87,7 +92,7 @@ class Bomber(Enemy):
             boomerang_distance, boomerang_direction = self.get_entity_distance_direction(player.boomerang)
             self.rect.center = original_position
             if boomerang_distance < player.boomerang.attack_distance: 
-                self.health -= player.boomerang.attack_damage
+                self.take_damage(player.boomerang.attack_damage)
                 player.boomerang.max_age = 0
         
         

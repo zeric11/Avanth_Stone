@@ -115,8 +115,10 @@ class Level:
             if is_killed:
                 if type(sprite) == Meteor:
                     ExplosionEffect((sprite.hitbox.x, sprite.hitbox.y + 10), [self.visible_sprites], layer_num=1)
-                if type(sprite) in (Player, Ghost, Sentry, Bomber):
+                elif type(sprite) in (Player, Ghost, Sentry):
                     KilledEffect((sprite.hitbox.x, sprite.hitbox.y + 10), [self.visible_sprites], layer_num=1)
+                elif type(sprite) == Bomber:
+                    KilledEffect((sprite.hitbox.x, sprite.hitbox.y - 200), [self.visible_sprites], layer_num=1)
               
                                 
     def enemy_update(self) -> None:
