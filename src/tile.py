@@ -79,6 +79,7 @@ class Tile(pygame.sprite.Sprite):
         self.image = surface
         #self.image = pygame.transform.scale(self.image, (64, 64))
         self.rect = self.image.get_rect(topleft=position)
+        self.display_image = self.image
         self.hitbox = self.rect.inflate(0, -20)
 
 

@@ -11,6 +11,7 @@ class Player(Entity):
         
         super().__init__(position, groups, "player", layer_num)
         self.image = self.get_texture_surface("../textures/entities/player/down/stand.png")
+        self.display_image = self.image.copy()
         self.rect = self.image.get_rect(topleft=position)
         self.hitbox = self.rect.inflate(0, -20)
         self.obstacle_sprites = obstacle_sprites
@@ -18,16 +19,29 @@ class Player(Entity):
         self.import_player_textures()
         self.status = "down_stand"
         
-        self.health = 100
+        self.health = 10
         self.speed = 7
         self.is_blocking = False
-        self.attack_damage = 10
+        self.attack_damage = 1
         self.attack_distance = 100
         self.is_attacking = False
         self.attack_duration = 50
         self.attack_cooldown = 500
         self.attack_start_time = 0
         self.attack_end_time = 0
+        self.damage_taken = False
+        
+        self.attack_sound = pygame.mixer.Sound("../audio/mixkit-fast-sword-whoosh-2792.wav")
+        self.attack_sound.set_volume(1)
+        
+        self.block_sound = pygame.mixer.Sound("../audio/mixkit-sword-pierces-armor-2761.wav")
+        self.block_sound.set_volume(1)
+        
+        self.damage_sound = pygame.mixer.Sound("../audio/mixkit-knife-fast-hit-2184.wav")
+        self.damage_sound.set_volume(1)
+        
+        self.killed_sound = pygame.mixer.Sound("../audio/mixkit-funny-system-break-down-2955.wav")
+        
 
 
     def import_player_textures(self) -> None:
@@ -140,7 +154,7 @@ class Player(Entity):
             self.is_attacking = False
             self.attack_end_time = pygame.time.get_ticks()
 
-        if self.is_attacking and current_time - self.attack_end_time < self.attack_cooldown:
+        if current_time - self.attack_end_time < self.attack_cooldown:
             self.is_attacking = False
             
 
@@ -153,7 +167,37 @@ class Player(Entity):
 
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center=self.hitbox.center)
-            
+        
+        self.display_image = self.image.copy()
+        if self.damage_taken:
+            self.display_image.fill((255, 0, 0), special_flags=pygame.BLEND_MULT)
+            self.damage_taken = False
+        
+    
+    
+    def take_damage(self, damage_amount: float) -> None:
+        self.health -= damage_amount
+        self.damage_taken = True
+        self.damage_sound.play()
+        
+        
+    def block_damage(self) -> None:
+        self.block_sound.play()
+        
+        
+    def play_attack_sound(self) -> None:
+        if self.is_attacking:
+            if self.attack_sound.get_num_channels() < 1:
+                self.attack_sound.play()
+        else:
+            if self.attack_sound.get_num_channels() > 0:
+                self.attack_sound.stop()
+                
+                
+    def killed_update(self):
+        if self.health <= 0:
+            self.killed_sound.play()
+        
             
     def update(self) -> bool:
         self.get_input()
@@ -161,7 +205,9 @@ class Player(Entity):
         self.get_status()
         self.animate()
         self.move(self.speed)
+        self.play_attack_sound()
         if self.health <= 0:
+            self.killed_update()
             self.kill()
             return True        
         return False
