@@ -45,23 +45,23 @@ class Enemy(Entity):
         pass
 
 
-    def get_player_distance_direction(self, player: Player) -> tuple[pygame.math.Vector2, pygame.math.Vector2]:
+    def get_entity_distance_direction(self, entity: Entity) -> tuple[pygame.math.Vector2, pygame.math.Vector2]:
         enemy_vec = pygame.math.Vector2(self.rect.center)
-        player_vec = pygame.math.Vector2(player.rect.center)
-        distance = (player_vec - enemy_vec).magnitude()
+        entity_vec = pygame.math.Vector2(entity.rect.center)
+        distance = (entity_vec - enemy_vec).magnitude()
         if distance > 0:
-            direction = (player_vec - enemy_vec).normalize()
+            direction = (entity_vec - enemy_vec).normalize()
         else:
             direction = pygame.math.Vector2()
         return (distance, direction)
 
 
-    def get_status(self, player):
+    def update_status(self, player: Player) -> None:
         pass
 
         
-    def actions(self, player):
-        pass
+    def actions(self, player: Player) -> None:
+       pass
 
 
     def animate(self):
@@ -93,12 +93,21 @@ class Enemy(Entity):
             self.idle_sound.play()
     
     
-    def player_attack_update(self, player):
-        player_distance, player_direction = self.get_player_distance_direction(player)
+    def player_attack_update(self, player: Player) -> None:
+        player_distance, player_direction = self.get_entity_distance_direction(player)
         if player_distance < player.attack_distance:
             if player.is_attacking:
                 if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
                     self.take_damage(player.attack_damage)
+        
+        
+    def boomerang_attack_update(self, player: Player) -> None:
+        if player.boomerang and self.enemy_name != "boomerang":    
+            boomerang_distance, boomerang_direction = self.get_entity_distance_direction(player.boomerang)
+            if boomerang_distance < player.boomerang.attack_distance: 
+                self.take_damage(player.boomerang.attack_damage)
+                player.boomerang.max_age = 0
+
                     
                     
     def move(self, speed: float) -> None:
@@ -114,7 +123,7 @@ class Enemy(Entity):
             self.move_direction(speed, self.direction)
     
     
-    def update(self):
+    def update(self) -> None:
         self.move(self.speed)
         self.animate()
         self.cooldown()

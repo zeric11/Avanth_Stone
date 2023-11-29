@@ -66,8 +66,8 @@ class Ghost(Enemy):
         }
         
         
-    def get_status(self, player: Player) -> None:
-        player_distance, player_direction = self.get_player_distance_direction(player)
+    def update_status(self, player: Player) -> None:
+        player_distance, player_direction = self.get_entity_distance_direction(player)
 
         if player_distance > self.notice_radius or player.health <= 0:
             self.direction.xy = 0, 0
@@ -104,8 +104,7 @@ class Ghost(Enemy):
                 
                 
     def player_attack_update(self, player: Player) -> None:
-        player_distance, player_direction = self.get_player_distance_direction(player)
-        
+        player_distance, player_direction = self.get_entity_distance_direction(player)
         if player_distance < player.attack_distance:
             if player.is_attacking:
                 if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 

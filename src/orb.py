@@ -38,7 +38,7 @@ class Orb(Enemy):
         self.killed_sound.set_volume(0.1)
         
         
-    def get_status(self, player: Player) -> None:
+    def update_status(self, player: Player) -> None:
         if pygame.time.get_ticks() - self.start_age >= self.max_age:
             self.health = 0
             
@@ -48,7 +48,7 @@ class Orb(Enemy):
                 
                 
     def player_attack_update(self, player: Player) -> None:
-        player_distance, player_direction = self.get_player_distance_direction(player)
+        player_distance, player_direction = self.get_entity_distance_direction(player)
         
         if player_distance < player.attack_distance:
             if player.is_attacking:

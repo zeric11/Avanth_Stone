@@ -29,6 +29,11 @@ class Player(Entity):
         self.attack_cooldown = 500
         self.attack_start_time = 0
         self.attack_end_time = 0
+        
+        self.boomerang = None
+        self.boomerang_staged = False
+        self.boomerang_thrown = False
+
         self.damage_taken = False
         
         self.attack_sound = pygame.mixer.Sound("../audio/mixkit-fast-sword-whoosh-2792.wav")
@@ -41,7 +46,6 @@ class Player(Entity):
         self.damage_sound.set_volume(1)
         
         self.killed_sound = pygame.mixer.Sound("../audio/mixkit-funny-system-break-down-2955.wav")
-        
 
 
     def import_player_textures(self) -> None:
@@ -77,7 +81,8 @@ class Player(Entity):
         }
 
 
-    def get_input(self) -> None:
+    # Returns true if boomerang was thrown
+    def get_input(self) -> bool:
         keys = pygame.key.get_pressed()
         self.is_blocking = False
 
@@ -89,7 +94,10 @@ class Player(Entity):
         if keys[pygame.K_x]:
             self.is_attacking = False
             self.is_blocking = True
-
+            
+        if not self.is_attacking and not self.is_blocking and keys[pygame.K_c]:
+            self.boomerang_staged = True
+            
         # Movement input
         if keys[pygame.K_UP]:
             self.direction.y = -1
@@ -134,8 +142,8 @@ class Player(Entity):
                 
     def get_direction_facing(self) -> pygame.Vector2:
         if self.direction.x != 0 or self.direction.y != 0:
-            return self.direction
-        direction = pygame.Vector2()
+            return self.direction.copy()
+        direction = pygame.math.Vector2()
         if "down" in self.status:
             direction.xy = 0, 1
         elif "up" in self.status:
