@@ -13,12 +13,13 @@ class Bomber(Enemy):
         
         super().__init__("bomber", position, groups, layer_num, obstacle_sprites)
         self.image = self.get_texture_surface("../textures/entities/bomber/0.png")
+        self.display_image = self.image.copy()
         
         self.import_textures()
         self.status = "stand"
         self.animation_speed = 0.2
 
-        self.health = 100
+        self.health = 10
         self.speed = 5
         self.attack_damage = 0
         self.attack_radius = 10
@@ -42,7 +43,7 @@ class Bomber(Enemy):
     def update_status(self, player: Player) -> None:
         player_distance, player_direction = self.get_entity_distance_direction(player)
 
-        if player_distance > self.notice_radius:
+        if player_distance > self.notice_radius or player.health <= 0:
             self.direction.xy = 0, 0
             self.status = "stand"
 
@@ -63,10 +64,15 @@ class Bomber(Enemy):
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center = self.hitbox.center)
         
+        self.display_image = self.image.copy()
+        if self.damage_taken:
+            self.display_image.fill((255, 0, 0), special_flags=pygame.BLEND_MULT)
+            self.damage_taken = False
+        
         
     def player_attack_update(self, player: Player) -> None:
         player_distance, player_direction = self.get_entity_distance_direction(player)
-        if player_distance < self.attack_radius and self.can_attack:
+        if player_distance < self.attack_radius and self.can_attack and player.health > 0:
             self.attack_time = pygame.time.get_ticks()
             self.can_attack = False
             return player_direction
@@ -91,11 +97,7 @@ class Bomber(Enemy):
             if current_time - self.attack_time >= self.attack_cooldown:
                 self.can_attack = True
 
-    
-    def update(self) -> None:
-        self.move(self.speed)
-        self.animate()
-        self.cooldown()
+
 
 
     

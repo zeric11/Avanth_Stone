@@ -13,13 +13,14 @@ class Ghost(Enemy):
         
         super().__init__("ghost", position, groups, layer_num, obstacle_sprites)
         self.image = self.get_texture_surface("../textures/entities/ghost/down/stand.png")
+        self.display_image = self.image.copy()
         
         self.import_textures()
         self.status = "down_stand"
 
-        self.health = 100
+        self.health = 5
         self.speed = 2
-        self.attack_damage = 10
+        self.attack_damage = 1
         self.attack_distance = 5
         self.notice_radius = 500
 
@@ -27,6 +28,11 @@ class Ghost(Enemy):
         self.can_attack = True
         self.attack_time = None
         self.attack_cooldown = 400
+        
+        self.damage_sound = pygame.mixer.Sound("../audio/mixkit-explainer-video-game-alert-sweep-236.wav")
+        self.damage_sound.set_volume(1)
+        
+        self.killed_sound = pygame.mixer.Sound("../audio/mixkit-failure-arcade-alert-notification-240.wav")
         
     
     def import_textures(self) -> None:
@@ -63,7 +69,7 @@ class Ghost(Enemy):
     def update_status(self, player: Player) -> None:
         player_distance, player_direction = self.get_entity_distance_direction(player)
 
-        if player_distance > self.notice_radius:
+        if player_distance > self.notice_radius or player.health <= 0:
             self.direction.xy = 0, 0
             self.status = "down"
 
@@ -84,6 +90,11 @@ class Ghost(Enemy):
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center = self.hitbox.center)
         
+        self.display_image = self.image.copy()
+        if self.damage_taken:
+            self.display_image.fill((255, 0, 0), special_flags=pygame.BLEND_MULT)
+            self.damage_taken = False
+        
         
     def cooldown(self) -> None:
         if not self.can_attack:
@@ -97,24 +108,22 @@ class Ghost(Enemy):
         if player_distance < player.attack_distance:
             if player.is_attacking:
                 if player_distance < 10 or self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5: 
-                    self.health -= player.attack_damage
+                    self.take_damage(player.attack_damage)
                     self.knock_back(10, 10, self.get_reversed_direction(player_direction))
                     
-        if player_distance < self.attack_distance and self.can_attack:
+        if player_distance < self.attack_distance and self.can_attack and player.health > 0:
             if player.is_blocking and self.get_reversed_direction(player.get_direction_facing()) * player_direction >= 0.5:
+                player.block_damage()
                 player.knock_back(10, 10, player_direction)
                 self.knock_back(10, 5, self.get_reversed_direction(player_direction))
             else:
-                player.health -= self.attack_damage
+                player.take_damage(self.attack_damage)
                 player.knock_back(10, 10, player_direction)
                 
             self.attack_time = pygame.time.get_ticks()
             self.can_attack = False
             
     
-    def update(self) -> None:
-        self.move(self.speed)
-        self.animate()
-        self.cooldown()
+
 
     
