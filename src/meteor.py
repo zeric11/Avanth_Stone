@@ -26,7 +26,6 @@ class Meteor(Enemy):
         self.attack_damage = 2
         self.attack_distance = 15
         self.notice_radius = 0
-        #self.direction = direction
         self.direction.xy = 0, 1
         self.age = pygame.time.get_ticks()
         self.max_age = 1000000

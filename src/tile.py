@@ -31,6 +31,7 @@ layouts = {
     "Logs" : import_csv_layout("../map/map_Logs.csv"),
     "Trees" : import_csv_layout("../map/map_Trees.csv"),
     "Boss door" : import_csv_layout("../map/map_Boss door.csv"),
+    "Boss door frame" : import_csv_layout("../map/map_Boss door frame.csv"),
     "Water" : import_csv_layout("../map/map_Water.csv"),
     "Stone border" : import_csv_layout("../map/map_Stone border.csv"),
     "Border" : import_csv_layout("../map/map_Border.csv"),
@@ -77,10 +78,9 @@ class Tile(pygame.sprite.Sprite):
         self.sprite_type = sprite_type
         self.layer_num = layer_num
         self.image = surface
-        #self.image = pygame.transform.scale(self.image, (64, 64))
         self.rect = self.image.get_rect(topleft=position)
         self.display_image = self.image
-        self.hitbox = self.rect.inflate(0, -20)
+        self.hitbox = self.rect.inflate(-10, -20)
 
 
 

@@ -22,7 +22,7 @@ class Player(Entity):
         self.health = 10
         self.speed = 7
         self.is_blocking = False
-        self.attack_damage = 1
+        self.attack_damage = 2
         self.attack_distance = 100
         self.is_attacking = False
         self.attack_duration = 50

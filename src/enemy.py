@@ -19,7 +19,6 @@ class Enemy(Entity):
         self.hitbox = self.rect.inflate(0, -20)
         self.obstacle_sprites = obstacle_sprites
 
-        #self.import_textures(name)
         self.status = None
 
         self.health = 0
@@ -81,11 +80,12 @@ class Enemy(Entity):
     
     
     def take_damage(self, damage_amount: float) -> None:
-        self.health -= damage_amount
-        self.damage_taken = True
-        self.stun_remaining = self.stun_amount
-        if self.damage_sound and self.damage_sound.get_num_channels() < 1:
-            self.damage_sound.play()
+        if self.stun_remaining <= 0:
+            self.health -= damage_amount
+            self.damage_taken = True
+            self.stun_remaining = self.stun_amount
+            if self.damage_sound and self.damage_sound.get_num_channels() < 1:
+                self.damage_sound.play()
             
             
     def play_idle_sound(self) -> None:

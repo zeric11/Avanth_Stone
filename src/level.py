@@ -29,6 +29,11 @@ class Level:
 
         # sprite setup
         self.create_map()
+        
+        self.level_finished = False
+        self.is_killed = False
+        self.time_killed = 0
+        self.time_before_finished = 2000
 
 
     # Returns where player has died or not.
@@ -40,8 +45,14 @@ class Level:
         self.update()
         self.enemy_update()
         self.boomerang_update()
-        if self.player.health <= 0:
-            return True
+        if pygame.key.get_pressed()[pygame.K_k]:
+            self.kill_all_enemies()
+        if self.player.health <= 0 and self.time_killed == 0:
+            self.is_killed = True
+            self.time_killed = pygame.time.get_ticks()
+        if self.is_killed and pygame.time.get_ticks() - self.time_killed >= self.time_before_finished:
+            self.level_finished = True
+        return self.level_finished
 
     
     def create_map(self) -> None:
@@ -61,8 +72,13 @@ class Level:
         if layer == "Floor":
             pass
         
-        elif layer in ("Border", "Stone border", "Water", "Boss door"):
+        elif layer in ("Border", "Stone border", "Water", "Boss door frame"):
             Tile(position, [self.obstacle_sprites], "border", layer_num=1)
+            
+        elif layer == "Boss door":
+            image_surf = pygame.image.load("../textures/tilemap/wooden_door_closed.png").convert_alpha()
+            image_surf = pygame.transform.scale(image_surf, (64, 64))
+            self.boss_door = Tile(position, [self.visible_sprites, self.obstacle_sprites], "closed boss door", layer_num=1, surface=image_surf)
             
         elif layer == "Trees":
             if tile_id in tilemap_indices["objects - tree leaves"]:
@@ -110,6 +126,9 @@ class Level:
     
     
     def update(self) -> None:
+        if self.boss_door.sprite_type == "opened boss door":
+            if (pygame.math.Vector2(self.boss_door.rect.center) - pygame.math.Vector2(self.player.rect.center)).magnitude() < 10:
+                self.level_finished = True
         for sprite in self.visible_sprites:
             is_killed = sprite.update()
             if is_killed:
@@ -123,10 +142,10 @@ class Level:
                                 
     def enemy_update(self) -> None:
         enemy_sprites = [sprite for sprite in self.visible_sprites.sprites() if sprite.sprite_type == "enemy"]
+        if len(enemy_sprites) == 0:
+            self.open_boss_door()
         for enemy in enemy_sprites:
             projectile_direction = enemy.enemy_update(self.player)
-            #if is_killed and type(enemy) not in (Orb, Meteor):
-            #    print(len(enemy_sprites) - 1, "enemies remain.")
             if projectile_direction:
                 if type(enemy) == Sentry:
                     Orb(enemy.hitbox.center, projectile_direction, [self.visible_sprites, self.attackable_sprites], layer_num=1)
@@ -144,11 +163,16 @@ class Level:
             )
             self.player.boomerang_staged = False
             self.player.boomerang_thrown = True
+            
+            
+    def kill_all_enemies(self) -> None:
+        enemy_sprites = [sprite for sprite in self.visible_sprites.sprites() if sprite.sprite_type == "enemy"]
+        for enemy in enemy_sprites:
+            enemy.kill()
                     
                     
     def draw_hearts(self) -> None:
         for i in range(10):
-            #print(self.player.health)
             heart_surface = pygame.transform.scale(self.ui_textures[11 if self.player.health - i > 0 else 10], (32, 32))
             self.display_surface.blit(heart_surface, (4 + (i * 38), 4))
             
@@ -161,6 +185,14 @@ class Level:
             digit_surface = self.ui_textures[int(enemies_remaining_str[digit_amount - 1 - i])]
             digit_surface = pygame.transform.scale(digit_surface, (32, 32))
             self.display_surface.blit(digit_surface, (1920 - 32 - (i * 32), 4))
+            
+            
+    def open_boss_door(self) -> None:
+        image_surf = pygame.image.load("../textures/tilemap/wooden_door_open.png").convert_alpha()
+        image_surf = pygame.transform.scale(image_surf, (64, 64))
+        self.new_boss_door = Tile(self.boss_door.position, [self.visible_sprites], "opened boss door", layer_num=1, surface=image_surf)
+        self.boss_door.kill()
+        self.boss_door = self.new_boss_door
                                 
                                 
 class YSortCameraGroup(pygame.sprite.Group):

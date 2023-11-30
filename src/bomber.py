@@ -31,9 +31,10 @@ class Bomber(Enemy):
         self.attack_cooldown = 4000
         
         self.damage_sound = pygame.mixer.Sound("../audio/mixkit-weak-fast-blow-2145.wav")
-        self.damage_sound.set_volume(1)
+        self.damage_sound.set_volume(0.5)
         
         self.killed_sound = pygame.mixer.Sound("../audio/mixkit-video-game-power-up-3164.wav")
+        self.killed_sound.set_volume(0.5)
         
     
     def import_textures(self) -> None:

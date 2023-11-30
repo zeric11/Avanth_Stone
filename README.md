@@ -1,5 +1,22 @@
 # The Avanth Stone
 
+## How to run
+
+Install the required packages using:
+
+```
+pip install -r requirements.txt
+```
+
+Run `main.py` in the `src` folder using the command:
+
+```
+python3 main.py
+```
+
+
+## Info
+
 Taking inspiration from the original *Legend of Zelda games*, the Avanth Stone will be a small 2D pixel art fantasy role-playing game in which the player is tasked with the quest of retrieving the "Avanth Stone."   
 
 The goal for this project is to implement a variety of 2D gameplay mechanics. This will include...
